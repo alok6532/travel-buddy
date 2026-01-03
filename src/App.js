@@ -101,6 +101,7 @@ const TravelCompanionApp = () => {
   const [selectedIdFile, setSelectedIdFile] = useState(null);
   const [emailVerificationCode, setEmailVerificationCode] = useState('');
   const [sentVerificationCode, setSentVerificationCode] = useState(false);
+  const [showProfileScoreInfo, setShowProfileScoreInfo] = useState(false);
   
   // Expense tracking state
   const [expenses, setExpenses] = useState({});
@@ -485,6 +486,7 @@ const TravelCompanionApp = () => {
       pricePerPerson: "₹35,000",
       spots: { total: 6, filled: 3 },
       type: "Adventure",
+      minTrustScore: 80, // Minimum profile score required to join
       activities: ['Biking', 'Camping', 'Photography', 'Cultural Tours'],
       languages: ['English', 'Hindi'],
       rating: 4.7,
@@ -1139,6 +1141,16 @@ const TravelCompanionApp = () => {
   // Removed the auto-scroll effect for category filters
 
   const handleJoinTrip = (trip) => {
+    // Check if trip has minimum trust score requirement
+    if (trip.minTrustScore && userProfile.trustScore < trip.minTrustScore) {
+      // Block join and show message
+      alert(`You cannot join this group because your profile score (${userProfile.trustScore}) is below the required level (${trip.minTrustScore}).\n\nYou will be redirected to learn how to increase your profile score.`);
+      
+      // Redirect to profile improvement section
+      setShowProfileScoreInfo(true);
+      return;
+    }
+    
     setSelectedTrip(trip);
   };
 
@@ -6381,6 +6393,12 @@ const TravelCompanionApp = () => {
             <p className="text-sm font-semibold text-gray-900">
               {spots.filled}/{spots.total} spots
             </p>
+            {trip.minTrustScore && (
+              <p className="text-xs text-gray-600 mt-1">
+                <Shield className="w-3 h-3 inline mr-1" />
+                Min Score: {trip.minTrustScore}
+              </p>
+            )}
             <div className="flex flex-col gap-2 mt-1">
               <button 
                 onClick={() => handleJoinTrip(trip)}
@@ -8139,6 +8157,33 @@ const TravelCompanionApp = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Total Spots</label>
                   <input type="number" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="How many travelers?" min="2" max="20" />
                 </div>
+                
+                {/* Minimum Profile Score Requirement */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Minimum Profile Score (Optional)
+                    <span className="text-xs text-gray-500 ml-2">Your score: {userProfile.trustScore}</span>
+                  </label>
+                  <input 
+                    type="number" 
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    placeholder="Leave empty for no requirement" 
+                    min="0" 
+                    max="100"
+                    step="5"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Set a minimum profile score required to join this trip. Only users with a profile score at or above this level can join. 
+                    <button 
+                      type="button"
+                      onClick={() => setShowProfileScoreInfo(true)}
+                      className="text-blue-600 hover:text-blue-700 ml-1"
+                    >
+                      Learn more about profile scores
+                    </button>
+                  </p>
+                </div>
+                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                   <textarea rows="4" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Describe your trip plans, interests, and what you're looking for in travel companions..."></textarea>
@@ -9016,6 +9061,185 @@ const TravelCompanionApp = () => {
                       </p>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Profile Score Info Modal */}
+      {showProfileScoreInfo && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  <Shield className="w-7 h-7 text-blue-600" />
+                  How to Increase Your Profile Score
+                </h2>
+                <button 
+                  onClick={() => setShowProfileScoreInfo(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900">Your Current Profile Score</h3>
+                  <div className="text-3xl font-bold text-blue-600">{userProfile.trustScore}</div>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all"
+                    style={{ width: `${userProfile.trustScore}%` }}
+                  ></div>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Ways to Improve Your Score:</h3>
+                
+                <div className="grid md:grid-cols-2 gap-4">
+                  {/* ID Verification */}
+                  <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-all">
+                    <div className="flex items-start gap-3">
+                      <div className={`p-2 rounded-lg ${userProfile.idVerified ? 'bg-green-100' : 'bg-gray-100'}`}>
+                        <Shield className={`w-5 h-5 ${userProfile.idVerified ? 'text-green-600' : 'text-gray-600'}`} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-semibold text-gray-900">ID Verification</h4>
+                          <span className="text-sm font-bold text-blue-600">+25 pts</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">Verify your identity with a government ID</p>
+                        {userProfile.idVerified ? (
+                          <span className="text-xs text-green-600 font-medium flex items-center gap-1">
+                            <CheckCircle className="w-4 h-4" /> Completed
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setShowProfileScoreInfo(false);
+                              setShowVerificationModal(true);
+                              setVerificationStep('id-upload');
+                            }}
+                            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                          >
+                            Verify Now →
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Email Verification */}
+                  <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-all">
+                    <div className="flex items-start gap-3">
+                      <div className={`p-2 rounded-lg ${userProfile.emailVerified ? 'bg-green-100' : 'bg-gray-100'}`}>
+                        <CheckCircle className={`w-5 h-5 ${userProfile.emailVerified ? 'text-green-600' : 'text-gray-600'}`} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-semibold text-gray-900">Email Verification</h4>
+                          <span className="text-sm font-bold text-blue-600">+10 pts</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">Confirm your email address</p>
+                        {userProfile.emailVerified ? (
+                          <span className="text-xs text-green-600 font-medium flex items-center gap-1">
+                            <CheckCircle className="w-4 h-4" /> Completed
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setShowProfileScoreInfo(false);
+                              setShowVerificationModal(true);
+                              setVerificationStep('email-verify');
+                            }}
+                            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                          >
+                            Verify Now →
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Complete Trips */}
+                  <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-all">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-purple-100">
+                        <Map className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-semibold text-gray-900">Complete Trips</h4>
+                          <span className="text-sm font-bold text-blue-600">+20 pts</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">Up to 20 points (1 per trip)</p>
+                        <span className="text-xs text-gray-700">
+                          You've completed: {userProfile.tripsCompleted || 0} trip{(userProfile.tripsCompleted || 0) !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Get Ratings */}
+                  <div className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-all">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-yellow-100">
+                        <Star className="w-5 h-5 text-yellow-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-semibold text-gray-900">Get High Ratings</h4>
+                          <span className="text-sm font-bold text-blue-600">+15 pts</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">Based on your average rating</p>
+                        <span className="text-xs text-gray-700">
+                          Your rating: {userProfile.rating ? `${userProfile.rating} ⭐` : 'Not rated yet'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <Lightbulb className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-2">Tips for Building Trust</h4>
+                      <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
+                        <li>Complete your profile with accurate information</li>
+                        <li>Be responsive to messages (aim for &lt;1 hour response time)</li>
+                        <li>Be a reliable travel companion - show up on time and honor commitments</li>
+                        <li>Get verified with ID and email to show you're a real person</li>
+                        <li>Participate actively in trips and contribute positively</li>
+                        <li>Maintain good communication with trip organizers and members</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={() => {
+                      setShowProfileScoreInfo(false);
+                      setShowVerificationModal(true);
+                      setVerificationStep('choose');
+                    }}
+                    className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  >
+                    Start Verification
+                  </button>
+                  <button
+                    onClick={() => setShowProfileScoreInfo(false)}
+                    className="px-6 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                  >
+                    Close
+                  </button>
                 </div>
               </div>
             </div>
