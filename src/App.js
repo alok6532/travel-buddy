@@ -6253,8 +6253,13 @@ const TravelCompanionApp = () => {
 
   const TripCard = ({ trip }) => {
     const spots = tripSpots[trip.id];
+    const isFiltered = selectedFilters.tripType !== 'all';
+    const matchesFilter = !isFiltered || trip.type === selectedFilters.tripType;
+    
     return (
-    <div className={`card-trip ${darkMode ? 'bg-gray-800 text-white' : 'bg-white'} rounded-lg shadow-md overflow-hidden`}>
+    <div className={`card-trip ${darkMode ? 'bg-gray-800 text-white' : 'bg-white'} rounded-lg shadow-md overflow-hidden ${
+      isFiltered && matchesFilter ? 'ring-4 ring-blue-500 ring-opacity-50 shadow-xl transform scale-105 transition-all duration-300' : ''
+    }`}>
       <div className="card-trip-image relative h-48 overflow-hidden">
         {lowDataMode ? (
           <div className={`w-full h-full ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} flex items-center justify-center`}>
@@ -6268,6 +6273,9 @@ const TravelCompanionApp = () => {
         )}
         <div className="absolute top-3 right-3 bg-white px-3 py-1 rounded-full text-sm font-semibold text-gray-700">
           {trip.budget}
+        </div>
+        <div className="absolute bottom-3 right-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+          {trip.type}
         </div>
         {trip.rating && (
           <div className="absolute top-3 left-3 bg-white px-3 py-1 rounded-full text-sm font-semibold text-gray-900 flex items-center">
@@ -7330,7 +7338,23 @@ const TravelCompanionApp = () => {
             {/* All Trips Section (List View) */}
             {viewMode === 'list' && (
               <div ref={tripsSectionRef}>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">All Trips</h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {selectedFilters.tripType === 'all' ? 'All Trips' : `${selectedFilters.tripType} Trips`}
+                  </h2>
+                  {selectedFilters.tripType !== 'all' && (
+                    <div className="flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full">
+                      <Filter className="w-4 h-4" />
+                      <span className="font-medium">Showing {filteredTrips.length} {selectedFilters.tripType} trip{filteredTrips.length !== 1 ? 's' : ''}</span>
+                      <button
+                        onClick={() => setSelectedFilters({...selectedFilters, tripType: 'all'})}
+                        className="ml-2 hover:bg-blue-200 rounded-full p-1 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredTrips.map(trip => (
                     <TripCard key={trip.id} trip={trip} />
