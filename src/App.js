@@ -4572,7 +4572,7 @@ const TravelCompanionApp = () => {
 
     return (
       <div className="mb-8">
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-2 sm:gap-4 mb-6 overflow-x-auto pb-2">
           {[
             { id: 'trending', label: 'Trending', icon: Flame },
             { id: 'recent', label: 'New', icon: Sparkles },
@@ -4582,7 +4582,7 @@ const TravelCompanionApp = () => {
             <button
               key={id}
               onClick={() => setDiscoverySection(id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 discoverySection === id
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
