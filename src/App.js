@@ -4032,7 +4032,6 @@ const TravelCompanionApp = () => {
 
   // Advanced Filters Panel
   const AdvancedFiltersPanel = () => {
-    console.log('AdvancedFiltersPanel rendering, showAdvancedFilters:', showAdvancedFilters);
     
     // Auto-scroll to filters when opened
     const filtersRef = React.useRef(null);
@@ -6446,9 +6445,7 @@ const TravelCompanionApp = () => {
   };
 
   const filteredTrips = React.useMemo(() => {
-    console.log('Filtering trips with selectedFilters.tripType:', selectedFilters.tripType);
     const result = getFilteredAndSortedTrips();
-    console.log('Filtered result:', result.length, 'trips');
     return result;
   }, [searchQuery, selectedFilters, sortBy, advancedFilters]);
 
@@ -6903,7 +6900,6 @@ const TravelCompanionApp = () => {
                   {/* Filters Button - Hidden on very small screens, shown on sm+ */}
                   <button
                     onClick={() => {
-                      console.log('Filter button clicked, current state:', showAdvancedFilters);
                       setShowAdvancedFilters(!showAdvancedFilters);
                     }}
                     className="hidden sm:flex bg-gray-100 text-gray-700 px-3 md:px-4 py-3 rounded-md hover:bg-gray-200 transition-colors items-center gap-2"
@@ -6934,7 +6930,6 @@ const TravelCompanionApp = () => {
                 {/* Mobile Filters Button - Only on very small screens */}
                 <button
                   onClick={() => {
-                    console.log('Mobile filter button clicked, current state:', showAdvancedFilters);
                     setShowAdvancedFilters(!showAdvancedFilters);
                   }}
                   className="sm:hidden w-full mt-2 bg-gray-100 text-gray-700 px-4 py-2.5 rounded-md hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
@@ -6996,7 +6991,6 @@ const TravelCompanionApp = () => {
               <div className="flex items-center justify-center flex-wrap gap-2 sm:gap-3 px-2">
                 <button
                   onClick={() => {
-                    console.log('All button clicked');
                     setSelectedFilters({...selectedFilters, tripType: 'all'});
                   }}
                   className={`px-6 py-2 rounded-full font-medium transition-all ${
@@ -7009,7 +7003,6 @@ const TravelCompanionApp = () => {
                 </button>
                 <button
                   onClick={() => {
-                    console.log('Adventure button clicked');
                     setSelectedFilters({...selectedFilters, tripType: 'Adventure'});
                   }}
                   className={`px-6 py-2 rounded-full font-medium transition-all ${
@@ -7022,7 +7015,6 @@ const TravelCompanionApp = () => {
                 </button>
                 <button
                   onClick={() => {
-                    console.log('Beach button clicked');
                     setSelectedFilters({...selectedFilters, tripType: 'Beach'});
                   }}
                   className={`px-6 py-2 rounded-full font-medium transition-all ${
@@ -7035,7 +7027,6 @@ const TravelCompanionApp = () => {
                 </button>
                 <button
                   onClick={() => {
-                    console.log('Nature button clicked');
                     setSelectedFilters({...selectedFilters, tripType: 'Nature'});
                   }}
                   className={`px-6 py-2 rounded-full font-medium transition-all ${
@@ -7048,7 +7039,6 @@ const TravelCompanionApp = () => {
                 </button>
                 <button
                   onClick={() => {
-                    console.log('Cultural button clicked');
                     setSelectedFilters({...selectedFilters, tripType: 'Cultural'});
                   }}
                   className={`px-6 py-2 rounded-full font-medium transition-all ${
