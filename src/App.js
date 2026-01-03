@@ -2961,8 +2961,10 @@ const TravelCompanionApp = () => {
 
   // Enhanced filtering with activities, languages, and ratings
   const getFilteredAndSortedTrips = () => {
+    console.log('Filtering trips with searchQuery:', searchQuery);
     let filtered = trips.filter(trip => {
-      const matchesSearch = trip.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      const matchesSearch = searchQuery === '' || 
+                           trip.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            trip.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            trip.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            trip.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -6824,13 +6826,16 @@ const TravelCompanionApp = () => {
                       placeholder="Search destinations..."
                       value={searchQuery}
                       onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                        if (e.target.value.trim()) {
-                          addToSearchHistory(e.target.value);
+                        const query = e.target.value;
+                        console.log('Search query changed:', query);
+                        setSearchQuery(query);
+                        if (query.trim()) {
+                          addToSearchHistory(query);
                         }
                       }}
                       onKeyPress={(e) => {
                         if (e.key === 'Enter' && searchQuery.trim()) {
+                          console.log('Enter pressed, search query:', searchQuery);
                           addToSearchHistory(searchQuery);
                           // Search happens automatically through filtering
                         }
