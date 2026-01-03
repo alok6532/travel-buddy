@@ -5,6 +5,8 @@ import { Search, MapPin, Calendar, Users, DollarSign, Globe, Heart, MessageCircl
 const TravelCompanionApp = () => {
   // Ref for search results section
   const searchResultsRef = useRef(null);
+  // Ref for trips section (for auto-scroll when category filters change)
+  const tripsSectionRef = useRef(null);
   
   // Debug - log when component mounts
   useEffect(() => {
@@ -1113,6 +1115,21 @@ const TravelCompanionApp = () => {
       return () => clearTimeout(timer);
     }
   }, [searchQuery]);
+
+  // Auto-scroll to trips section when category filter changes
+  React.useEffect(() => {
+    // Only scroll if a specific category is selected (not 'all')
+    if (selectedFilters.tripType !== 'all' && tripsSectionRef.current) {
+      const timer = setTimeout(() => {
+        tripsSectionRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [selectedFilters.tripType]);
 
   const handleJoinTrip = (trip) => {
     setSelectedTrip(trip);
@@ -7312,7 +7329,7 @@ const TravelCompanionApp = () => {
 
             {/* All Trips Section (List View) */}
             {viewMode === 'list' && (
-              <div>
+              <div ref={tripsSectionRef}>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">All Trips</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredTrips.map(trip => (
