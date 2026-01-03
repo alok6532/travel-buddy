@@ -6400,7 +6400,13 @@ const TravelCompanionApp = () => {
   );
   };
 
-  const filteredTrips = getFilteredAndSortedTrips();
+  const filteredTrips = React.useMemo(() => {
+    const result = getFilteredAndSortedTrips();
+    console.log('useMemo recalculated filteredTrips:', result.length, 'trips');
+    return result;
+  }, [searchQuery, selectedFilters, sortBy, advancedFilters]);
+
+  console.log('Rendering with filteredTrips:', filteredTrips.length);
 
   return (
     <div className={`min-h-screen overflow-x-hidden ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
