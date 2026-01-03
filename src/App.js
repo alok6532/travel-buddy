@@ -6806,45 +6806,67 @@ const TravelCompanionApp = () => {
       </header>
 
       {/* Hero Section */}
-      <div className={`${darkMode ? 'bg-gradient-to-r from-gray-800 to-gray-900' : 'bg-gradient-to-r from-blue-600 to-blue-800'} text-white py-16`}>
+      <div className={`${darkMode ? 'bg-gradient-to-r from-gray-800 to-gray-900' : 'bg-gradient-to-r from-blue-600 to-blue-800'} text-white py-8 sm:py-12 md:py-16`}>
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-4">Find Your Perfect Travel Companion</h2>
-          <p className="text-xl mb-8 text-blue-100">Explore India with like-minded travelers. Share experiences, split costs, make memories.</p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">Find Your Perfect Travel Companion</h2>
+          <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 text-blue-100 px-4">Explore India with like-minded travelers. Share experiences, split costs, make memories.</p>
           
           {/* Search Bar */}
           {activeTab === 'explore' && (
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-3xl mx-auto px-2 sm:px-0">
               <div className="bg-white rounded-lg shadow-lg p-2 mb-6">
-                <div className="flex items-center">
-                  <Search className="w-5 h-5 text-gray-400 ml-3" />
-                  <input
-                    type="text"
-                    placeholder="Search destinations, trip types..."
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      if (e.target.value.trim()) {
-                        addToSearchHistory(e.target.value);
-                      }
-                    }}
-                    className="flex-1 px-4 py-3 text-gray-900 outline-none"
-                  />
+                {/* Search Input Row */}
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center flex-1 min-w-0">
+                    <Search className="w-5 h-5 text-gray-400 ml-2 flex-shrink-0" />
+                    <input
+                      type="text"
+                      placeholder="Search destinations..."
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        if (e.target.value.trim()) {
+                          addToSearchHistory(e.target.value);
+                        }
+                      }}
+                      className="flex-1 px-3 py-3 text-gray-900 outline-none min-w-0"
+                    />
+                  </div>
+                  
+                  {/* Filters Button - Hidden on very small screens, shown on sm+ */}
                   <button
                     onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                    className="bg-gray-100 text-gray-700 px-4 py-3 rounded-md hover:bg-gray-200 transition-colors flex items-center gap-2 mr-2"
+                    className="hidden sm:flex bg-gray-100 text-gray-700 px-3 md:px-4 py-3 rounded-md hover:bg-gray-200 transition-colors items-center gap-2"
                   >
                     <Sliders className="w-4 h-4" />
-                    Filters
+                    <span className="hidden md:inline">Filters</span>
                     {getActiveFilterCount() > 0 && (
                       <span className="bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs">
                         {getActiveFilterCount()}
                       </span>
                     )}
                   </button>
-                  <button className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors">
-                    Search
+                  
+                  {/* Search Button */}
+                  <button className="bg-blue-600 text-white px-4 sm:px-6 py-3 rounded-md hover:bg-blue-700 transition-colors flex-shrink-0">
+                    <span className="hidden sm:inline">Search</span>
+                    <Search className="w-4 h-4 sm:hidden" />
                   </button>
                 </div>
+                
+                {/* Mobile Filters Button - Only on very small screens */}
+                <button
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  className="sm:hidden w-full mt-2 bg-gray-100 text-gray-700 px-4 py-2.5 rounded-md hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Sliders className="w-4 h-4" />
+                  Filters
+                  {getActiveFilterCount() > 0 && (
+                    <span className="bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs">
+                      {getActiveFilterCount()}
+                    </span>
+                  )}
+                </button>
               </div>
               
               {/* View Switcher */}
