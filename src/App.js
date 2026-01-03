@@ -13,6 +13,31 @@ const TravelCompanionApp = () => {
     console.log('TravelCompanionApp mounted!');
   }, []);
   
+  // ============================================
+  // AUTHENTICATION STATE
+  // ============================================
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState('login'); // 'login' or 'signup'
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  
+  // Authentication form state
+  const [authForm, setAuthForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    bio: '',
+    interests: [],
+    languages: [],
+    budgetPreference: 'Mid-range',
+    profilePhoto: null
+  });
+  
+  const [authErrors, setAuthErrors] = useState({});
+  
   // Scroll to top on page load/refresh - more robust method
   useEffect(() => {
     // Disable browser scroll restoration
@@ -1137,10 +1162,317 @@ const TravelCompanionApp = () => {
     }
   }, [searchQuery]);
 
+  // ============================================
+  // AUTHENTICATION & SESSION MANAGEMENT
+  // ============================================
+  
+  // Load user session on mount
+  useEffect(() => {
+    const savedUser = localStorage.getItem('travelbuddy_user');
+    const authToken = localStorage.getItem('travelbuddy_token');
+    
+    if (savedUser && authToken) {
+      try {
+        const user = JSON.parse(savedUser);
+        setCurrentUser(user);
+        setIsAuthenticated(true);
+        
+        // Update userProfile with authenticated user data
+        setUserProfile(prev => ({
+          ...prev,
+          ...user,
+          trustScore: calculateTrustScore(user)
+        }));
+      } catch (error) {
+        console.error('Error loading session:', error);
+        handleLogout();
+      }
+    }
+  }, []);
+  
+  // Validate email format
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+  
+  // Validate password strength
+  const validatePassword = (password) => {
+    return password.length >= 8;
+  };
+  
+  // Hash password (simple simulation - use bcrypt in production)
+  const hashPassword = (password) => {
+    // In production, this would be done server-side with bcrypt
+    return btoa(password); // Base64 encoding for demo
+  };
+  
+  // Validate signup form
+  const validateSignupForm = () => {
+    const errors = {};
+    
+    if (!authForm.name.trim()) {
+      errors.name = 'Name is required';
+    }
+    
+    if (!authForm.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!validateEmail(authForm.email)) {
+      errors.email = 'Invalid email format';
+    }
+    
+    if (!authForm.password) {
+      errors.password = 'Password is required';
+    } else if (!validatePassword(authForm.password)) {
+      errors.password = 'Password must be at least 8 characters';
+    }
+    
+    if (authForm.password !== authForm.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+    
+    setAuthErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+  
+  // Validate login form
+  const validateLoginForm = () => {
+    const errors = {};
+    
+    if (!authForm.email.trim()) {
+      errors.email = 'Email is required';
+    }
+    
+    if (!authForm.password) {
+      errors.password = 'Password is required';
+    }
+    
+    setAuthErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+  
+  // Handle Signup
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    
+    if (!validateSignupForm()) {
+      return;
+    }
+    
+    try {
+      // Check if user already exists
+      const existingUsers = JSON.parse(localStorage.getItem('travelbuddy_users') || '[]');
+      const userExists = existingUsers.find(u => u.email === authForm.email);
+      
+      if (userExists) {
+        setAuthErrors({ email: 'User with this email already exists' });
+        return;
+      }
+      
+      // Create new user
+      const newUser = {
+        id: Date.now().toString(),
+        name: authForm.name,
+        email: authForm.email,
+        passwordHash: hashPassword(authForm.password),
+        bio: authForm.bio || '',
+        interests: authForm.interests,
+        languages: authForm.languages,
+        budgetPreference: authForm.budgetPreference,
+        profilePhoto: authForm.profilePhoto || null,
+        verified: false,
+        idVerified: false,
+        emailVerified: false,
+        universityEmail: authForm.email.includes('.edu'),
+        tripsCompleted: 0,
+        joinDate: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        rating: 0,
+        reviewCount: 0,
+        createdAt: new Date().toISOString()
+      };
+      
+      // Calculate initial trust score
+      newUser.trustScore = calculateTrustScore(newUser);
+      
+      // Save to localStorage (simulating database)
+      existingUsers.push(newUser);
+      localStorage.setItem('travelbuddy_users', JSON.stringify(existingUsers));
+      
+      // Create session token
+      const token = btoa(JSON.stringify({ userId: newUser.id, timestamp: Date.now() }));
+      localStorage.setItem('travelbuddy_token', token);
+      localStorage.setItem('travelbuddy_user', JSON.stringify(newUser));
+      
+      // Set authenticated state
+      setCurrentUser(newUser);
+      setIsAuthenticated(true);
+      setUserProfile(prev => ({ ...prev, ...newUser }));
+      
+      // Close modal and reset form
+      setShowAuthModal(false);
+      resetAuthForm();
+      
+      alert('Account created successfully! Welcome to Travel Buddy!');
+    } catch (error) {
+      console.error('Signup error:', error);
+      setAuthErrors({ general: 'An error occurred during signup. Please try again.' });
+    }
+  };
+  
+  // Handle Login
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    
+    if (!validateLoginForm()) {
+      return;
+    }
+    
+    try {
+      // Get users from localStorage
+      const existingUsers = JSON.parse(localStorage.getItem('travelbuddy_users') || '[]');
+      const user = existingUsers.find(u => u.email === authForm.email);
+      
+      if (!user) {
+        setAuthErrors({ email: 'No account found with this email' });
+        return;
+      }
+      
+      // Verify password
+      if (user.passwordHash !== hashPassword(authForm.password)) {
+        setAuthErrors({ password: 'Incorrect password' });
+        return;
+      }
+      
+      // Create session token
+      const token = btoa(JSON.stringify({ userId: user.id, timestamp: Date.now() }));
+      localStorage.setItem('travelbuddy_token', token);
+      localStorage.setItem('travelbuddy_user', JSON.stringify(user));
+      
+      // Set authenticated state
+      setCurrentUser(user);
+      setIsAuthenticated(true);
+      setUserProfile(prev => ({ ...prev, ...user }));
+      
+      // Close modal and reset form
+      setShowAuthModal(false);
+      resetAuthForm();
+      
+      alert('Login successful! Welcome back!');
+    } catch (error) {
+      console.error('Login error:', error);
+      setAuthErrors({ general: 'An error occurred during login. Please try again.' });
+    }
+  };
+  
+  // Handle Logout
+  const handleLogout = () => {
+    if (confirm('Are you sure you want to logout?')) {
+      // Clear session
+      localStorage.removeItem('travelbuddy_token');
+      localStorage.removeItem('travelbuddy_user');
+      
+      // Reset state
+      setCurrentUser(null);
+      setIsAuthenticated(false);
+      setShowProfile(false);
+      
+      // Reset to default profile
+      setUserProfile({
+        name: "Guest User",
+        email: "",
+        verified: false,
+        idVerified: false,
+        emailVerified: false,
+        universityEmail: false,
+        trustScore: 20,
+        tripsCompleted: 0,
+        joinDate: "Guest",
+        rating: 0,
+        reviewCount: 0
+      });
+      
+      alert('Logged out successfully!');
+      
+      // Redirect to home
+      setActiveTab('explore');
+    }
+  };
+  
+  // Reset auth form
+  const resetAuthForm = () => {
+    setAuthForm({
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      bio: '',
+      interests: [],
+      languages: [],
+      budgetPreference: 'Mid-range',
+      profilePhoto: null
+    });
+    setAuthErrors({});
+  };
+  
+  // Handle Google Login (simulated)
+  const handleGoogleLogin = () => {
+    alert('Google Sign-In integration coming soon!\n\nThis would use OAuth 2.0 to authenticate with Google.');
+  };
+  
+  // Update profile
+  const handleUpdateProfile = (e) => {
+    e.preventDefault();
+    
+    if (!currentUser) return;
+    
+    try {
+      const updatedUser = {
+        ...currentUser,
+        name: authForm.name || currentUser.name,
+        bio: authForm.bio || currentUser.bio,
+        interests: authForm.interests.length > 0 ? authForm.interests : currentUser.interests,
+        languages: authForm.languages.length > 0 ? authForm.languages : currentUser.languages,
+        budgetPreference: authForm.budgetPreference || currentUser.budgetPreference,
+        profilePhoto: authForm.profilePhoto || currentUser.profilePhoto
+      };
+      
+      // Update trust score
+      updatedUser.trustScore = calculateTrustScore(updatedUser);
+      
+      // Update in localStorage
+      const users = JSON.parse(localStorage.getItem('travelbuddy_users') || '[]');
+      const userIndex = users.findIndex(u => u.id === currentUser.id);
+      if (userIndex !== -1) {
+        users[userIndex] = updatedUser;
+        localStorage.setItem('travelbuddy_users', JSON.stringify(users));
+      }
+      
+      localStorage.setItem('travelbuddy_user', JSON.stringify(updatedUser));
+      
+      // Update state
+      setCurrentUser(updatedUser);
+      setUserProfile(prev => ({ ...prev, ...updatedUser }));
+      
+      setShowEditProfile(false);
+      alert('Profile updated successfully!');
+    } catch (error) {
+      console.error('Update profile error:', error);
+      alert('An error occurred while updating your profile.');
+    }
+  };
+
   // No need for auto-scroll to trips section since filtered results appear at top
   // Removed the auto-scroll effect for category filters
 
   const handleJoinTrip = (trip) => {
+    // Check authentication first
+    if (!isAuthenticated) {
+      alert('Please login to join a trip');
+      setShowAuthModal(true);
+      setAuthMode('login');
+      return;
+    }
+    
     // Check if trip has minimum trust score requirement
     if (trip.minTrustScore && userProfile.trustScore < trip.minTrustScore) {
       // Block join and show message
@@ -6670,7 +7002,15 @@ const TravelCompanionApp = () => {
               <div className={`hidden sm:block w-px h-8 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'} mx-1`}></div>
               
               <button 
-                onClick={() => setShowCreateForm(true)}
+                onClick={() => {
+                  if (isAuthenticated) {
+                    setShowCreateForm(true);
+                  } else {
+                    alert('Please login to create a trip');
+                    setShowAuthModal(true);
+                    setAuthMode('login');
+                  }
+                }}
                 className="hidden sm:flex bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-2.5 rounded-xl transition-all items-center gap-2 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 font-medium"
               >
                 <Plus className="w-5 h-5" />
@@ -6690,12 +7030,34 @@ const TravelCompanionApp = () => {
                 {showMobileMenu ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
               
-              <button 
-                onClick={() => setShowProfile(true)}
-                className="hidden sm:flex w-10 h-10 bg-gray-300 rounded-full items-center justify-center hover:bg-gray-400 transition-colors cursor-pointer"
-              >
-                <User className="w-6 h-6 text-gray-600" />
-              </button>
+              {/* Profile / Auth Buttons */}
+              {isAuthenticated ? (
+                <button 
+                  onClick={() => setShowProfile(true)}
+                  className="hidden sm:flex w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full items-center justify-center hover:shadow-lg transition-all cursor-pointer ring-2 ring-white"
+                  title={currentUser?.name}
+                >
+                  {currentUser?.profilePhoto ? (
+                    <img 
+                      src={currentUser.profilePhoto} 
+                      alt={currentUser.name} 
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-white font-bold text-sm">
+                      {currentUser?.name?.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </button>
+              ) : (
+                <button 
+                  onClick={() => { setShowAuthModal(true); setAuthMode('login'); }}
+                  className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
+                >
+                  <User className="w-4 h-4" />
+                  Login / Sign Up
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -8364,7 +8726,23 @@ const TravelCompanionApp = () => {
             <div className="mt-6 space-y-3">
               <button 
                 onClick={() => {
-                  alert('Edit Profile feature coming soon! You will be able to update your name, email, bio, and profile picture.');
+                  if (isAuthenticated) {
+                    // Pre-fill form with current user data
+                    setAuthForm({
+                      ...authForm,
+                      name: currentUser.name,
+                      bio: currentUser.bio || '',
+                      interests: currentUser.interests || [],
+                      languages: currentUser.languages || [],
+                      budgetPreference: currentUser.budgetPreference || 'Mid-range'
+                    });
+                    setShowEditProfile(true);
+                    setShowProfile(false);
+                  } else {
+                    alert('Please login to edit your profile');
+                    setShowAuthModal(true);
+                    setAuthMode('login');
+                  }
                 }}
                 className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
               >
@@ -8383,11 +8761,8 @@ const TravelCompanionApp = () => {
               </button>
               <button 
                 onClick={() => {
-                  if (confirm('Are you sure you want to logout?')) {
-                    alert('Logged out successfully! (This is a demo - full auth coming soon)');
-                    setShowProfile(false);
-                    // Reset user state in a real app
-                  }
+                  setShowProfile(false);
+                  handleLogout();
                 }}
                 className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
               >
@@ -9068,6 +9443,365 @@ const TravelCompanionApp = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Authentication Modal */}
+      {showAuthModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="p-6 sm:p-8">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {authMode === 'login' ? 'Welcome Back!' : 'Join Travel Buddy'}
+                </h2>
+                <button 
+                  onClick={() => { setShowAuthModal(false); resetAuthForm(); }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              {/* Google Login Option */}
+              <button
+                onClick={handleGoogleLogin}
+                className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-300 rounded-xl hover:bg-gray-50 transition-colors mb-4"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                <span className="font-medium text-gray-700">Continue with Google</span>
+              </button>
+              
+              <div className="flex items-center gap-3 my-6">
+                <div className="flex-1 h-px bg-gray-300"></div>
+                <span className="text-sm text-gray-500">or</span>
+                <div className="flex-1 h-px bg-gray-300"></div>
+              </div>
+              
+              {/* Login Form */}
+              {authMode === 'login' && (
+                <form onSubmit={handleLogin} className="space-y-4">
+                  {authErrors.general && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                      {authErrors.general}
+                    </div>
+                  )}
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={authForm.email}
+                      onChange={(e) => setAuthForm({...authForm, email: e.target.value})}
+                      className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        authErrors.email ? 'border-red-300' : 'border-gray-300'
+                      }`}
+                      placeholder="your@email.com"
+                    />
+                    {authErrors.email && (
+                      <p className="mt-1 text-sm text-red-600">{authErrors.email}</p>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Password
+                    </label>
+                    <input
+                      type="password"
+                      value={authForm.password}
+                      onChange={(e) => setAuthForm({...authForm, password: e.target.value})}
+                      className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        authErrors.password ? 'border-red-300' : 'border-gray-300'
+                      }`}
+                      placeholder="••••••••"
+                    />
+                    {authErrors.password && (
+                      <p className="mt-1 text-sm text-red-600">{authErrors.password}</p>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-sm">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" className="rounded" />
+                      <span className="text-gray-600">Remember me</span>
+                    </label>
+                    <button type="button" className="text-blue-600 hover:text-blue-700 font-medium">
+                      Forgot password?
+                    </button>
+                  </div>
+                  
+                  <button
+                    type="submit"
+                    className="w-full py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+                  >
+                    Login
+                  </button>
+                </form>
+              )}
+              
+              {/* Signup Form */}
+              {authMode === 'signup' && (
+                <form onSubmit={handleSignup} className="space-y-4">
+                  {authErrors.general && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                      {authErrors.general}
+                    </div>
+                  )}
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={authForm.name}
+                      onChange={(e) => setAuthForm({...authForm, name: e.target.value})}
+                      className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        authErrors.name ? 'border-red-300' : 'border-gray-300'
+                      }`}
+                      placeholder="John Doe"
+                    />
+                    {authErrors.name && (
+                      <p className="mt-1 text-sm text-red-600">{authErrors.name}</p>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={authForm.email}
+                      onChange={(e) => setAuthForm({...authForm, email: e.target.value})}
+                      className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        authErrors.email ? 'border-red-300' : 'border-gray-300'
+                      }`}
+                      placeholder="your@email.com"
+                    />
+                    {authErrors.email && (
+                      <p className="mt-1 text-sm text-red-600">{authErrors.email}</p>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Password
+                    </label>
+                    <input
+                      type="password"
+                      value={authForm.password}
+                      onChange={(e) => setAuthForm({...authForm, password: e.target.value})}
+                      className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        authErrors.password ? 'border-red-300' : 'border-gray-300'
+                      }`}
+                      placeholder="••••••••"
+                    />
+                    {authErrors.password && (
+                      <p className="mt-1 text-sm text-red-600">{authErrors.password}</p>
+                    )}
+                    <p className="mt-1 text-xs text-gray-500">Minimum 8 characters</p>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Confirm Password
+                    </label>
+                    <input
+                      type="password"
+                      value={authForm.confirmPassword}
+                      onChange={(e) => setAuthForm({...authForm, confirmPassword: e.target.value})}
+                      className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        authErrors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+                      }`}
+                      placeholder="••••••••"
+                    />
+                    {authErrors.confirmPassword && (
+                      <p className="mt-1 text-sm text-red-600">{authErrors.confirmPassword}</p>
+                    )}
+                  </div>
+                  
+                  <button
+                    type="submit"
+                    className="w-full py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+                  >
+                    Create Account
+                  </button>
+                </form>
+              )}
+              
+              {/* Toggle Login/Signup */}
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-600">
+                  {authMode === 'login' ? "Don't have an account? " : "Already have an account? "}
+                  <button
+                    onClick={() => {
+                      setAuthMode(authMode === 'login' ? 'signup' : 'login');
+                      resetAuthForm();
+                    }}
+                    className="text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    {authMode === 'login' ? 'Sign Up' : 'Login'}
+                  </button>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Edit Profile Modal */}
+      {showEditProfile && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="p-6 sm:p-8">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  <Edit className="w-7 h-7 text-blue-600" />
+                  Edit Profile
+                </h2>
+                <button 
+                  onClick={() => setShowEditProfile(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              <form onSubmit={handleUpdateProfile} className="space-y-6">
+                {/* Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={authForm.name}
+                    onChange={(e) => setAuthForm({...authForm, name: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Your name"
+                  />
+                </div>
+                
+                {/* Bio */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Bio
+                  </label>
+                  <textarea
+                    value={authForm.bio}
+                    onChange={(e) => setAuthForm({...authForm, bio: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Tell us about yourself..."
+                    rows="4"
+                  />
+                </div>
+                
+                {/* Budget Preference */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Budget Preference
+                  </label>
+                  <select
+                    value={authForm.budgetPreference}
+                    onChange={(e) => setAuthForm({...authForm, budgetPreference: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="Budget">Budget (₹500-1500/day)</option>
+                    <option value="Mid-range">Mid-range (₹1500-3000/day)</option>
+                    <option value="Luxury">Luxury (₹3000+/day)</option>
+                  </select>
+                </div>
+                
+                {/* Interests */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Interests (Select multiple)
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {['Adventure', 'Photography', 'Culture', 'Food', 'Beach', 'Mountains', 'Wildlife', 'History'].map(interest => (
+                      <button
+                        key={interest}
+                        type="button"
+                        onClick={() => {
+                          const interests = authForm.interests || [];
+                          if (interests.includes(interest)) {
+                            setAuthForm({...authForm, interests: interests.filter(i => i !== interest)});
+                          } else {
+                            setAuthForm({...authForm, interests: [...interests, interest]});
+                          }
+                        }}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                          (authForm.interests || []).includes(interest)
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {interest}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Languages */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Languages (Select multiple)
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {['English', 'Hindi', 'Spanish', 'French', 'German', 'Mandarin', 'Japanese', 'Arabic'].map(language => (
+                      <button
+                        key={language}
+                        type="button"
+                        onClick={() => {
+                          const languages = authForm.languages || [];
+                          if (languages.includes(language)) {
+                            setAuthForm({...authForm, languages: languages.filter(l => l !== language)});
+                          } else {
+                            setAuthForm({...authForm, languages: [...languages, language]});
+                          }
+                        }}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                          (authForm.languages || []).includes(language)
+                            ? 'bg-green-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {language}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Buttons */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowEditProfile(false)}
+                    className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
