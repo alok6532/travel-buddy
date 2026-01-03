@@ -6253,13 +6253,9 @@ const TravelCompanionApp = () => {
 
   const TripCard = ({ trip }) => {
     const spots = tripSpots[trip.id];
-    const isFiltered = selectedFilters.tripType !== 'all';
-    const matchesFilter = !isFiltered || trip.type === selectedFilters.tripType;
     
     return (
-    <div className={`card-trip ${darkMode ? 'bg-gray-800 text-white' : 'bg-white'} rounded-lg shadow-md overflow-hidden ${
-      isFiltered && matchesFilter ? 'ring-4 ring-blue-500 ring-opacity-50 shadow-xl transform scale-105 transition-all duration-300' : ''
-    }`}>
+    <div className={`card-trip ${darkMode ? 'bg-gray-800 text-white' : 'bg-white'} rounded-lg shadow-md overflow-hidden`}>
       <div className="card-trip-image relative h-48 overflow-hidden">
         {lowDataMode ? (
           <div className={`w-full h-full ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} flex items-center justify-center`}>
