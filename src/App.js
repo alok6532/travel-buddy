@@ -12,6 +12,12 @@ const TravelCompanionApp = () => {
   useEffect(() => {
     console.log('TravelCompanionApp mounted!');
   }, []);
+  
+  // Scroll to top on page load/refresh
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
   const [activeTab, setActiveTab] = useState('explore');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilters, setSelectedFilters] = useState({
