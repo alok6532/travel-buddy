@@ -13,9 +13,22 @@ const TravelCompanionApp = () => {
     console.log('TravelCompanionApp mounted!');
   }, []);
   
-  // Scroll to top on page load/refresh
+  // Scroll to top on page load/refresh - more robust method
   useEffect(() => {
+    // Disable browser scroll restoration
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    
+    // Force scroll to top immediately
     window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    
+    // Also try after a small delay to ensure DOM is ready
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 0);
   }, []);
   
   const [activeTab, setActiveTab] = useState('explore');
