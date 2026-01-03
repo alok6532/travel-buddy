@@ -6425,7 +6425,9 @@ const TravelCompanionApp = () => {
   };
 
   const filteredTrips = React.useMemo(() => {
+    console.log('Filtering trips with selectedFilters.tripType:', selectedFilters.tripType);
     const result = getFilteredAndSortedTrips();
+    console.log('Filtered result:', result.length, 'trips');
     return result;
   }, [searchQuery, selectedFilters, sortBy, advancedFilters]);
 
@@ -6972,7 +6974,10 @@ const TravelCompanionApp = () => {
               {/* Category Pills */}
               <div className="flex items-center justify-center flex-wrap gap-2 sm:gap-3 px-2">
                 <button
-                  onClick={() => setSelectedFilters({...selectedFilters, tripType: 'all'})}
+                  onClick={() => {
+                    console.log('All button clicked');
+                    setSelectedFilters({...selectedFilters, tripType: 'all'});
+                  }}
                   className={`px-6 py-2 rounded-full font-medium transition-all ${
                     selectedFilters.tripType === 'all' 
                       ? 'bg-white text-blue-600 shadow-md' 
@@ -6982,7 +6987,10 @@ const TravelCompanionApp = () => {
                   All
                 </button>
                 <button
-                  onClick={() => setSelectedFilters({...selectedFilters, tripType: 'Adventure'})}
+                  onClick={() => {
+                    console.log('Adventure button clicked');
+                    setSelectedFilters({...selectedFilters, tripType: 'Adventure'});
+                  }}
                   className={`px-6 py-2 rounded-full font-medium transition-all ${
                     selectedFilters.tripType === 'Adventure' 
                       ? 'bg-white text-blue-600 shadow-md' 
@@ -6992,7 +7000,10 @@ const TravelCompanionApp = () => {
                   🏔️ Adventure
                 </button>
                 <button
-                  onClick={() => setSelectedFilters({...selectedFilters, tripType: 'Beach'})}
+                  onClick={() => {
+                    console.log('Beach button clicked');
+                    setSelectedFilters({...selectedFilters, tripType: 'Beach'});
+                  }}
                   className={`px-6 py-2 rounded-full font-medium transition-all ${
                     selectedFilters.tripType === 'Beach' 
                       ? 'bg-white text-blue-600 shadow-md' 
@@ -7002,7 +7013,10 @@ const TravelCompanionApp = () => {
                   🏖️ Beach
                 </button>
                 <button
-                  onClick={() => setSelectedFilters({...selectedFilters, tripType: 'Nature'})}
+                  onClick={() => {
+                    console.log('Nature button clicked');
+                    setSelectedFilters({...selectedFilters, tripType: 'Nature'});
+                  }}
                   className={`px-6 py-2 rounded-full font-medium transition-all ${
                     selectedFilters.tripType === 'Nature' 
                       ? 'bg-white text-blue-600 shadow-md' 
@@ -7012,7 +7026,10 @@ const TravelCompanionApp = () => {
                   🌿 Nature
                 </button>
                 <button
-                  onClick={() => setSelectedFilters({...selectedFilters, tripType: 'Cultural'})}
+                  onClick={() => {
+                    console.log('Cultural button clicked');
+                    setSelectedFilters({...selectedFilters, tripType: 'Cultural'});
+                  }}
                   className={`px-6 py-2 rounded-full font-medium transition-all ${
                     selectedFilters.tripType === 'Cultural' 
                       ? 'bg-white text-blue-600 shadow-md' 
