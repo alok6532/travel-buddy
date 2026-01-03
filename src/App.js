@@ -7025,6 +7025,13 @@ const TravelCompanionApp = () => {
             </div>
           )}
         </div>
+        
+        {/* Advanced Filters Panel - Moved here to appear right after search bar */}
+        {activeTab === 'explore' && (
+          <div className="max-w-7xl mx-auto px-4 mt-4">
+            <AdvancedFiltersPanel />
+          </div>
+        )}
       </div>
 
       {/* Filters */}
@@ -7223,9 +7230,6 @@ const TravelCompanionApp = () => {
                 Generate AI Itinerary for Your Trip
               </button>
             </div>
-
-            {/* Advanced Filters Panel */}
-            <AdvancedFiltersPanel />
 
             {/* Search Results Highlight - Shows when actively searching */}
             {searchQuery && (
