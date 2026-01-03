@@ -5433,9 +5433,9 @@ const TravelCompanionApp = () => {
                 {/* Forecast */}
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-4">5-Day Forecast</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex md:grid md:grid-cols-2 gap-4 overflow-x-auto pb-4 snap-x snap-mandatory">
                     {(weatherData[trip.id]?.forecast || []).map((day, idx) => (
-                      <div key={idx} className="bg-white border border-gray-200 p-4 rounded-lg">
+                      <div key={idx} className="bg-white border border-gray-200 p-4 rounded-lg flex-shrink-0 w-[280px] md:w-auto snap-start">
                         <div className="flex justify-between items-start mb-3">
                           <div>
                             <div className="font-semibold text-gray-900">{day.date}</div>
