@@ -4985,39 +4985,39 @@ const TravelCompanionApp = () => {
     const groupMembers = ['You', 'Sarah K.', 'Raj P.', 'Emma W.']; // Get from trip members
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg w-full max-w-6xl h-[90vh] flex flex-col">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+        <div className="bg-white rounded-lg w-full max-w-6xl h-[95vh] sm:h-[90vh] flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="p-6 border-b">
+          <div className="p-4 sm:p-6 border-b flex-shrink-0">
             <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">{trip.title}</h2>
-                <p className="text-gray-600">{trip.destination} • {trip.dates}</p>
+              <div className="flex-1 min-w-0 pr-4">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">{trip.title}</h2>
+                <p className="text-sm sm:text-base text-gray-600 truncate">{trip.destination} • {trip.dates}</p>
               </div>
               <button 
                 onClick={() => setShowLogistics(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 flex-shrink-0"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
 
             {/* Sub-navigation */}
-            <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+            <div className="flex gap-1 bg-gray-100 p-1 rounded-lg overflow-x-auto">
               {['itinerary', 'expenses', 'packing', 'weather'].map(tab => (
                 <button
                   key={tab}
                   onClick={() => setLogisticsTab(tab)}
-                  className={`flex-1 py-2 px-4 rounded-md transition-colors capitalize ${
+                  className={`flex-shrink-0 py-2 px-3 sm:px-4 rounded-md transition-colors capitalize text-sm sm:text-base whitespace-nowrap ${
                     logisticsTab === tab 
                       ? 'bg-white text-blue-600 font-medium shadow-sm' 
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  {tab === 'itinerary' && <Calendar className="w-4 h-4 inline mr-2" />}
-                  {tab === 'expenses' && <DollarSign className="w-4 h-4 inline mr-2" />}
-                  {tab === 'packing' && <Package className="w-4 h-4 inline mr-2" />}
-                  {tab === 'weather' && <Cloud className="w-4 h-4 inline mr-2" />}
+                  {tab === 'itinerary' && <Calendar className="w-4 h-4 inline mr-1 sm:mr-2" />}
+                  {tab === 'expenses' && <DollarSign className="w-4 h-4 inline mr-1 sm:mr-2" />}
+                  {tab === 'packing' && <Package className="w-4 h-4 inline mr-1 sm:mr-2" />}
+                  {tab === 'weather' && <Cloud className="w-4 h-4 inline mr-1 sm:mr-2" />}
                   {tab}
                 </button>
               ))}
@@ -5025,7 +5025,7 @@ const TravelCompanionApp = () => {
           </div>
 
           {/* Content Area */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6">
             {/* ITINERARY TAB */}
             {logisticsTab === 'itinerary' && (
               <div className="space-y-6">
@@ -5431,37 +5431,37 @@ const TravelCompanionApp = () => {
                 </div>
 
                 {/* Forecast */}
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-4">5-Day Forecast</h3>
-                  <div className="flex md:grid md:grid-cols-2 gap-4 overflow-x-auto pb-4 snap-x snap-mandatory">
+                <div className="overflow-hidden -mx-4 sm:mx-0">
+                  <h3 className="font-semibold text-gray-900 mb-4 px-4 sm:px-0">5-Day Forecast</h3>
+                  <div className="flex md:grid md:grid-cols-2 gap-3 sm:gap-4 overflow-x-auto pb-4 px-4 sm:px-0 snap-x snap-mandatory -mr-4 sm:mr-0">
                     {(weatherData[trip.id]?.forecast || []).map((day, idx) => (
-                      <div key={idx} className="bg-white border border-gray-200 p-4 rounded-lg flex-shrink-0 w-[280px] md:w-auto snap-start">
+                      <div key={idx} className="bg-white border border-gray-200 p-3 sm:p-4 rounded-lg flex-shrink-0 w-[260px] sm:w-[280px] md:w-auto snap-start">
                         <div className="flex justify-between items-start mb-3">
                           <div>
-                            <div className="font-semibold text-gray-900">{day.date}</div>
-                            <div className="text-2xl font-bold text-gray-700">
+                            <div className="font-semibold text-gray-900 text-sm sm:text-base">{day.date}</div>
+                            <div className="text-xl sm:text-2xl font-bold text-gray-700">
                               {day.temp.min}° - {day.temp.max}°C
                             </div>
                           </div>
-                          <div className="text-right">
-                            {day.condition === 'Sunny' && <Sun className="w-10 h-10 text-yellow-500" />}
-                            {day.condition === 'Rainy' && <CloudRain className="w-10 h-10 text-blue-500" />}
-                            {day.condition === 'Cloudy' && <Cloud className="w-10 h-10 text-gray-500" />}
-                            {day.condition === 'Partly Cloudy' && <Cloud className="w-10 h-10 text-gray-400" />}
-                            {day.condition === 'Snowy' && <CloudSnow className="w-10 h-10 text-blue-300" />}
+                          <div className="text-right flex-shrink-0">
+                            {day.condition === 'Sunny' && <Sun className="w-8 h-8 sm:w-10 sm:h-10 text-yellow-500" />}
+                            {day.condition === 'Rainy' && <CloudRain className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500" />}
+                            {day.condition === 'Cloudy' && <Cloud className="w-8 h-8 sm:w-10 sm:h-10 text-gray-500" />}
+                            {day.condition === 'Partly Cloudy' && <Cloud className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />}
+                            {day.condition === 'Snowy' && <CloudSnow className="w-8 h-8 sm:w-10 sm:h-10 text-blue-300" />}
                           </div>
                         </div>
-                        <div className="flex items-center justify-between text-sm text-gray-600">
+                        <div className="flex items-center justify-between text-xs sm:text-sm text-gray-600">
                           <div className="flex items-center gap-1">
-                            <CloudRain className="w-4 h-4" />
+                            <CloudRain className="w-3 h-3 sm:w-4 sm:h-4" />
                             {day.rainProb}%
                           </div>
                           <div className="flex items-center gap-1">
-                            <Wind className="w-4 h-4" />
+                            <Wind className="w-3 h-3 sm:w-4 sm:h-4" />
                             {day.wind} km/h
                           </div>
                         </div>
-                        <div className="mt-2 text-sm font-medium text-gray-700">{day.condition}</div>
+                        <div className="mt-2 text-xs sm:text-sm font-medium text-gray-700">{day.condition}</div>
                       </div>
                     ))}
                   </div>
