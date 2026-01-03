@@ -1094,6 +1094,18 @@ const TravelCompanionApp = () => {
     };
   }, []);
 
+  // Auto-scroll to search results when search query changes
+  React.useEffect(() => {
+    if (searchQuery && searchQuery.length > 0) {
+      setTimeout(() => {
+        const resultsElement = document.getElementById('search-results');
+        if (resultsElement) {
+          resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, [searchQuery]);
+
   const handleJoinTrip = (trip) => {
     setSelectedTrip(trip);
   };
@@ -2961,18 +2973,12 @@ const TravelCompanionApp = () => {
 
   // Enhanced filtering with activities, languages, and ratings
   const getFilteredAndSortedTrips = () => {
-    console.log('Filtering trips with searchQuery:', searchQuery);
-    console.log('Total trips before filter:', trips.length);
     let filtered = trips.filter(trip => {
       const matchesSearch = searchQuery === '' || 
                            trip.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            trip.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            trip.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            trip.description.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      if (searchQuery !== '' && matchesSearch) {
-        console.log('Trip matches search:', trip.title);
-      }
       
       const matchesType = selectedFilters.tripType === 'all' || trip.type === selectedFilters.tripType;
       const matchesBudget = selectedFilters.budget === 'all' || trip.budget === selectedFilters.budget;
@@ -3019,8 +3025,6 @@ const TravelCompanionApp = () => {
         break;
     }
 
-    console.log('Filtered trips count:', filtered.length);
-    console.log('Filtered trips:', filtered.map(t => t.title));
     return filtered;
   };
 
@@ -6402,11 +6406,8 @@ const TravelCompanionApp = () => {
 
   const filteredTrips = React.useMemo(() => {
     const result = getFilteredAndSortedTrips();
-    console.log('useMemo recalculated filteredTrips:', result.length, 'trips');
     return result;
   }, [searchQuery, selectedFilters, sortBy, advancedFilters]);
-
-  console.log('Rendering with filteredTrips:', filteredTrips.length);
 
   return (
     <div className={`min-h-screen overflow-x-hidden ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
@@ -6841,7 +6842,6 @@ const TravelCompanionApp = () => {
                       value={searchQuery}
                       onChange={(e) => {
                         const query = e.target.value;
-                        console.log('Search query changed:', query);
                         setSearchQuery(query);
                         if (query.trim()) {
                           addToSearchHistory(query);
@@ -6849,7 +6849,6 @@ const TravelCompanionApp = () => {
                       }}
                       onKeyPress={(e) => {
                         if (e.key === 'Enter' && searchQuery.trim()) {
-                          console.log('Enter pressed, search query:', searchQuery);
                           addToSearchHistory(searchQuery);
                           // Search happens automatically through filtering
                         }
@@ -7202,8 +7201,55 @@ const TravelCompanionApp = () => {
             {/* Advanced Filters Panel */}
             <AdvancedFiltersPanel />
 
-            {/* Discovery Section - Only in List View */}
-            {viewMode === 'list' && <DiscoverySection />}
+            {/* Search Results Highlight - Shows when actively searching */}
+            {searchQuery && (
+              <div id="search-results" className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border-2 border-blue-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                      <Search className="w-6 h-6 text-blue-600" />
+                      Search Results for "{searchQuery}"
+                    </h2>
+                    <p className="text-gray-600 mt-1">
+                      Found {filteredTrips.length} trip{filteredTrips.length !== 1 ? 's' : ''} matching your search
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg hover:bg-gray-50 border border-gray-300"
+                  >
+                    <X className="w-4 h-4" />
+                    Clear Search
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredTrips.map(trip => (
+                    <TripCard key={trip.id} trip={trip} />
+                  ))}
+                </div>
+
+                {filteredTrips.length === 0 && (
+                  <div className="text-center py-12">
+                    <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-600 text-lg mb-2">No trips found for "{searchQuery}"</p>
+                    <p className="text-gray-500 mb-4">Try different keywords or check the spelling</p>
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+                    >
+                      Clear Search
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Discovery Section - Only when NOT searching */}
+            {!searchQuery && viewMode === 'list' && <DiscoverySection />}
 
             {/* View Mode Rendering */}
             {viewMode === 'map' && (
