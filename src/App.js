@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, MapPin, Calendar, Users, DollarSign, Globe, Heart, MessageCircle, User, Plus, Filter, Shield, AlertTriangle, Clock, Edit, Trash2, Check, X, Package, Cloud, CloudRain, Wind, Sun, CloudSnow, AlertCircle, Send, Pin, BarChart3, Crown, UserCheck, Reply, Sparkles, Zap, Target, TrendingUp, Lightbulb, RefreshCw, Settings, BookOpen, Image, Video, Bookmark, Folder, Eye, ThumbsUp, Share2, ArrowRight, TrendingDown, TrendingUp as TrendUp, PieChart, FileText, Award, Tag, ChevronRight, Map, List, Grid, Sliders, ZoomIn, ZoomOut, Maximize2, RotateCcw, Star, Flame, Loader, UserPlus, Lock, Unlock, MessageSquare, TrendingUp as Trending, Medal, Trophy, CheckCircle, UserMinus, Bell, Flag, XCircle, Mountain, Download, Wifi, WifiOff, Moon, Monitor, Smartphone, Zap as Lightning, Coins, CreditCard, ArrowDownToLine, RefreshCcw, Menu } from 'lucide-react';
 
 
 const TravelCompanionApp = () => {
+  // Ref for search results section
+  const searchResultsRef = useRef(null);
+  
   // Debug - log when component mounts
   useEffect(() => {
     console.log('TravelCompanionApp mounted!');
@@ -1097,12 +1100,17 @@ const TravelCompanionApp = () => {
   // Auto-scroll to search results when search query changes
   React.useEffect(() => {
     if (searchQuery && searchQuery.length > 0) {
-      setTimeout(() => {
-        const resultsElement = document.getElementById('search-results');
-        if (resultsElement) {
-          resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Wait for the component to render
+      const timer = setTimeout(() => {
+        if (searchResultsRef.current) {
+          searchResultsRef.current.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+          });
         }
-      }, 100);
+      }, 300);
+      
+      return () => clearTimeout(timer);
     }
   }, [searchQuery]);
 
@@ -7203,7 +7211,7 @@ const TravelCompanionApp = () => {
 
             {/* Search Results Highlight - Shows when actively searching */}
             {searchQuery && (
-              <div id="search-results" className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border-2 border-blue-200">
+              <div ref={searchResultsRef} id="search-results" className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border-2 border-blue-200">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
