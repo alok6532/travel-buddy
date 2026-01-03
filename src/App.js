@@ -6393,7 +6393,7 @@ const TravelCompanionApp = () => {
   const filteredTrips = getFilteredAndSortedTrips();
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
+    <div className={`min-h-screen overflow-x-hidden ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
       {/* Online/Offline Status Bar */}
       {!isOnline && (
         <div className="bg-orange-600 text-white py-2 px-4 text-center text-sm font-medium">
@@ -6870,50 +6870,50 @@ const TravelCompanionApp = () => {
               </div>
               
               {/* View Switcher */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-4">
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                    className={`px-3 sm:px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap ${
                       viewMode === 'list'
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
                     <List className="w-4 h-4" />
-                    List
+                    <span className="text-sm sm:text-base">List</span>
                   </button>
                   <button
                     onClick={() => setViewMode('map')}
-                    className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                    className={`px-3 sm:px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap ${
                       viewMode === 'map'
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
                     <Map className="w-4 h-4" />
-                    Map
+                    <span className="text-sm sm:text-base">Map</span>
                   </button>
                   <button
                     onClick={() => setViewMode('calendar')}
-                    className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                    className={`px-3 sm:px-4 py-2 rounded-lg flex items-center gap-2 whitespace-nowrap ${
                       viewMode === 'calendar'
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
                     <Calendar className="w-4 h-4" />
-                    Calendar
+                    <span className="text-sm sm:text-base">Calendar</span>
                   </button>
                 </div>
                 
-                <div className="text-sm text-gray-600">
-                  {filteredTrips.length} trips found
+                <div className="text-sm text-gray-600 text-center sm:text-left">
+                  {filteredTrips.length} trips
                 </div>
               </div>
 
               {/* Category Pills */}
-              <div className="flex items-center justify-center flex-wrap gap-3">
+              <div className="flex items-center justify-center flex-wrap gap-2 sm:gap-3 px-2">
                 <button
                   onClick={() => setSelectedFilters({...selectedFilters, tripType: 'all'})}
                   className={`px-6 py-2 rounded-full font-medium transition-all ${
