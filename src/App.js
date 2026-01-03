@@ -7467,20 +7467,20 @@ const TravelCompanionApp = () => {
                     <option value="long">Long (10+ days)</option>
                   </select>
                 </div>
-                <div className="flex items-center gap-4 mt-4">
-                  <span className="text-sm text-gray-600">Sort by:</span>
-                  <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-4">
+                  <span className="text-sm text-gray-600 whitespace-nowrap">Sort by:</span>
+                  <div className="flex gap-2 overflow-x-auto pb-2">
                     {['recent', 'popular', 'budget-low', 'budget-high'].map(sort => (
                       <button
                         key={sort}
                         onClick={() => setStoryFilters({ ...storyFilters, sortBy: sort })}
-                        className={`px-4 py-1.5 rounded-full text-sm ${
+                        className={`px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm whitespace-nowrap flex-shrink-0 ${
                           storyFilters.sortBy === sort
                             ? 'bg-blue-600 text-white'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                       >
-                        {sort === 'recent' ? 'Recent' : sort === 'popular' ? 'Popular' : sort === 'budget-low' ? 'Budget: Low to High' : 'Budget: High to Low'}
+                        {sort === 'recent' ? 'Recent' : sort === 'popular' ? 'Popular' : sort === 'budget-low' ? 'Budget: Low→High' : 'Budget: High→Low'}
                       </button>
                     ))}
                   </div>
