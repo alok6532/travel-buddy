@@ -4016,10 +4016,21 @@ const TravelCompanionApp = () => {
   // Advanced Filters Panel
   const AdvancedFiltersPanel = () => {
     console.log('AdvancedFiltersPanel rendering, showAdvancedFilters:', showAdvancedFilters);
+    
+    // Auto-scroll to filters when opened
+    const filtersRef = React.useRef(null);
+    React.useEffect(() => {
+      if (showAdvancedFilters && filtersRef.current) {
+        setTimeout(() => {
+          filtersRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    }, [showAdvancedFilters]);
+    
     if (!showAdvancedFilters) return null;
 
     return (
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+      <div ref={filtersRef} className="bg-white rounded-lg shadow-lg p-6 mb-6 border-4 border-blue-500 animate-pulse">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Sliders className="w-5 h-5 text-blue-600" />
