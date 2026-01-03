@@ -1116,20 +1116,8 @@ const TravelCompanionApp = () => {
     }
   }, [searchQuery]);
 
-  // Auto-scroll to trips section when category filter changes
-  React.useEffect(() => {
-    // Only scroll if a specific category is selected (not 'all')
-    if (selectedFilters.tripType !== 'all' && tripsSectionRef.current) {
-      const timer = setTimeout(() => {
-        tripsSectionRef.current?.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start' 
-        });
-      }, 300);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [selectedFilters.tripType]);
+  // No need for auto-scroll to trips section since filtered results appear at top
+  // Removed the auto-scroll effect for category filters
 
   const handleJoinTrip = (trip) => {
     setSelectedTrip(trip);
@@ -7058,6 +7046,49 @@ const TravelCompanionApp = () => {
         {activeTab === 'explore' && (
           <div className="max-w-7xl mx-auto px-4 mt-4">
             <AdvancedFiltersPanel />
+          </div>
+        )}
+        
+        {/* Filtered Trips Display - Right after category buttons */}
+        {activeTab === 'explore' && selectedFilters.tripType !== 'all' && (
+          <div className="max-w-7xl mx-auto px-4 mt-6">
+            <div ref={tripsSectionRef} className="bg-white rounded-lg shadow-lg p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {selectedFilters.tripType} Trips
+                </h2>
+                <div className="flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full">
+                  <Filter className="w-4 h-4" />
+                  <span className="font-medium">Showing {filteredTrips.length} trip{filteredTrips.length !== 1 ? 's' : ''}</span>
+                  <button
+                    onClick={() => setSelectedFilters({...selectedFilters, tripType: 'all'})}
+                    className="ml-2 hover:bg-blue-200 rounded-full p-1 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredTrips.map(trip => (
+                  <TripCard key={trip.id} trip={trip} />
+                ))}
+              </div>
+              
+              {filteredTrips.length === 0 && (
+                <div className="text-center py-12">
+                  <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-600 text-lg mb-2">No {selectedFilters.tripType} trips found</p>
+                  <p className="text-gray-500">Try selecting a different category</p>
+                  <button
+                    onClick={() => setSelectedFilters({...selectedFilters, tripType: 'all'})}
+                    className="mt-4 text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    View All Trips
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
