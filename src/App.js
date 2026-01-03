@@ -6829,6 +6829,12 @@ const TravelCompanionApp = () => {
                           addToSearchHistory(e.target.value);
                         }
                       }}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && searchQuery.trim()) {
+                          addToSearchHistory(searchQuery);
+                          // Search happens automatically through filtering
+                        }
+                      }}
                       className="flex-1 px-3 py-3 text-gray-900 outline-none min-w-0"
                     />
                   </div>
@@ -6848,7 +6854,14 @@ const TravelCompanionApp = () => {
                   </button>
                   
                   {/* Search Button */}
-                  <button className="bg-blue-600 text-white px-4 sm:px-6 py-3 rounded-md hover:bg-blue-700 transition-colors flex-shrink-0">
+                  <button 
+                    onClick={() => {
+                      if (searchQuery.trim()) {
+                        addToSearchHistory(searchQuery);
+                      }
+                    }}
+                    className="bg-blue-600 text-white px-4 sm:px-6 py-3 rounded-md hover:bg-blue-700 transition-colors flex-shrink-0"
+                  >
                     <span className="hidden sm:inline">Search</span>
                     <Search className="w-4 h-4 sm:hidden" />
                   </button>
