@@ -4015,6 +4015,7 @@ const TravelCompanionApp = () => {
 
   // Advanced Filters Panel
   const AdvancedFiltersPanel = () => {
+    console.log('AdvancedFiltersPanel rendering, showAdvancedFilters:', showAdvancedFilters);
     if (!showAdvancedFilters) return null;
 
     return (
@@ -6867,7 +6868,10 @@ const TravelCompanionApp = () => {
                   
                   {/* Filters Button - Hidden on very small screens, shown on sm+ */}
                   <button
-                    onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                    onClick={() => {
+                      console.log('Filter button clicked, current state:', showAdvancedFilters);
+                      setShowAdvancedFilters(!showAdvancedFilters);
+                    }}
                     className="hidden sm:flex bg-gray-100 text-gray-700 px-3 md:px-4 py-3 rounded-md hover:bg-gray-200 transition-colors items-center gap-2"
                   >
                     <Sliders className="w-4 h-4" />
@@ -6895,7 +6899,10 @@ const TravelCompanionApp = () => {
                 
                 {/* Mobile Filters Button - Only on very small screens */}
                 <button
-                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  onClick={() => {
+                    console.log('Mobile filter button clicked, current state:', showAdvancedFilters);
+                    setShowAdvancedFilters(!showAdvancedFilters);
+                  }}
                   className="sm:hidden w-full mt-2 bg-gray-100 text-gray-700 px-4 py-2.5 rounded-md hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
                 >
                   <Sliders className="w-4 h-4" />
