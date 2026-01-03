@@ -8328,8 +8328,8 @@ const TravelCompanionApp = () => {
 
       {/* Profile Modal */}
       {showProfile && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-md w-full p-4 sm:p-6 my-4">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">My Profile</h2>
               <button 
@@ -8364,29 +8364,34 @@ const TravelCompanionApp = () => {
             <div className="mt-6 space-y-3">
               <button 
                 onClick={() => {
-                  alert('Edit Profile feature coming soon!');
+                  alert('Edit Profile feature coming soon! You will be able to update your name, email, bio, and profile picture.');
                 }}
-                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
               >
+                <Edit className="w-4 h-4" />
                 Edit Profile
               </button>
               <button 
                 onClick={() => {
-                  alert('Settings page coming soon!');
+                  setShowProfile(false);
+                  setShowAccessibilitySettings(true);
                 }}
-                className="w-full bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                className="w-full bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center gap-2"
               >
+                <Settings className="w-4 h-4" />
                 Settings
               </button>
               <button 
                 onClick={() => {
                   if (confirm('Are you sure you want to logout?')) {
-                    alert('Logged out successfully!');
+                    alert('Logged out successfully! (This is a demo - full auth coming soon)');
                     setShowProfile(false);
+                    // Reset user state in a real app
                   }
                 }}
-                className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors"
+                className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
               >
+                <Lock className="w-4 h-4" />
                 Logout
               </button>
             </div>
