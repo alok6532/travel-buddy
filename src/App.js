@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Calendar, Users, DollarSign, Globe, Heart, MessageCircle, User, Plus, Filter, Shield, AlertTriangle, Clock, Edit, Trash2, Check, X, Package, Cloud, CloudRain, Wind, Sun, CloudSnow, AlertCircle, Send, Pin, BarChart3, Crown, UserCheck, Reply, Sparkles, Zap, Target, TrendingUp, Lightbulb, RefreshCw, Settings, BookOpen, Image, Video, Bookmark, Folder, Eye, ThumbsUp, Share2, ArrowRight, TrendingDown, TrendingUp as TrendUp, PieChart, FileText, Award, Tag, ChevronRight, Map, List, Grid, Sliders, ZoomIn, ZoomOut, Maximize2, RotateCcw, Star, Flame, Loader, UserPlus, Lock, Unlock, MessageSquare, TrendingUp as Trending, Medal, Trophy, CheckCircle, UserMinus, Bell, Flag, XCircle, Mountain, Download, Wifi, WifiOff, Moon, Monitor, Smartphone, Zap as Lightning, Coins, CreditCard, ArrowDownToLine, RefreshCcw } from 'lucide-react';
+import { Search, MapPin, Calendar, Users, DollarSign, Globe, Heart, MessageCircle, User, Plus, Filter, Shield, AlertTriangle, Clock, Edit, Trash2, Check, X, Package, Cloud, CloudRain, Wind, Sun, CloudSnow, AlertCircle, Send, Pin, BarChart3, Crown, UserCheck, Reply, Sparkles, Zap, Target, TrendingUp, Lightbulb, RefreshCw, Settings, BookOpen, Image, Video, Bookmark, Folder, Eye, ThumbsUp, Share2, ArrowRight, TrendingDown, TrendingUp as TrendUp, PieChart, FileText, Award, Tag, ChevronRight, Map, List, Grid, Sliders, ZoomIn, ZoomOut, Maximize2, RotateCcw, Star, Flame, Loader, UserPlus, Lock, Unlock, MessageSquare, TrendingUp as Trending, Medal, Trophy, CheckCircle, UserMinus, Bell, Flag, XCircle, Mountain, Download, Wifi, WifiOff, Moon, Monitor, Smartphone, Zap as Lightning, Coins, CreditCard, ArrowDownToLine, RefreshCcw, Menu } from 'lucide-react';
 
 
 const TravelCompanionApp = () => {
@@ -245,6 +245,7 @@ const TravelCompanionApp = () => {
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
   const [showOfflineModal, setShowOfflineModal] = useState(false);
   const [showAccessibilitySettings, setShowAccessibilitySettings] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   
   const availableLanguages = [
     'English', 'Hindi', 'Spanish', 'French', 'Chinese', 'Russian', 
@@ -6415,20 +6416,20 @@ const TravelCompanionApp = () => {
 
       {/* Header */}
       <header className={`${darkMode ? 'bg-gray-800 border-b border-gray-700' : 'bg-white border-b border-gray-200'} shadow-md sticky top-0 z-50 backdrop-blur-lg bg-opacity-95`}>
-        <div className="max-w-7xl mx-auto px-6 py-3">
-          <div className="flex items-center justify-between gap-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+          <div className="flex items-center justify-between gap-4">
             {/* Logo */}
             <div className="flex items-center gap-3 flex-shrink-0">
               <div className={`p-2 rounded-xl ${darkMode ? 'bg-blue-500/10' : 'bg-blue-50'} transition-transform hover:scale-105`}>
-                <Globe className={`w-7 h-7 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+                <Globe className={`w-6 h-6 sm:w-7 sm:h-7 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
               </div>
-              <h1 className={`text-2xl font-bold bg-gradient-to-r ${darkMode ? 'from-blue-400 to-purple-400' : 'from-blue-600 to-purple-600'} bg-clip-text text-transparent`}>
+              <h1 className={`text-xl sm:text-2xl font-bold bg-gradient-to-r ${darkMode ? 'from-blue-400 to-purple-400' : 'from-blue-600 to-purple-600'} bg-clip-text text-transparent`}>
                 TravelBuddy
               </h1>
             </div>
             
-            {/* Navigation */}
-            <nav className="flex items-center gap-1 flex-1 justify-center">
+            {/* Desktop Navigation - Hidden on Mobile */}
+            <nav className="hidden lg:flex items-center gap-1 flex-1 justify-center">
               <button 
                 onClick={() => setActiveTab('explore')}
                 className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${
@@ -6547,10 +6548,10 @@ const TravelCompanionApp = () => {
             
             {/* Action Buttons */}
             <div className="flex items-center gap-2 flex-shrink-0">
-              {/* Accessibility Quick Actions */}
+              {/* Desktop Quick Actions - Hidden on small screens */}
               <button 
                 onClick={() => setShowCurrencyModal(true)}
-                className={`p-2.5 rounded-xl transition-all ${
+                className={`hidden sm:block p-2.5 rounded-xl transition-all ${
                   darkMode 
                     ? 'hover:bg-gray-700 text-gray-300 hover:text-blue-400' 
                     : 'hover:bg-gray-100 text-gray-600 hover:text-blue-600'
@@ -6562,7 +6563,7 @@ const TravelCompanionApp = () => {
               
               <button 
                 onClick={toggleDarkMode}
-                className={`p-2.5 rounded-xl transition-all ${
+                className={`hidden sm:block p-2.5 rounded-xl transition-all ${
                   darkMode 
                     ? 'hover:bg-gray-700 text-gray-300 hover:text-yellow-400' 
                     : 'hover:bg-gray-100 text-gray-600 hover:text-blue-600'
@@ -6574,7 +6575,7 @@ const TravelCompanionApp = () => {
               
               <button 
                 onClick={() => setShowAccessibilitySettings(true)}
-                className={`p-2.5 rounded-xl transition-all ${
+                className={`hidden sm:block p-2.5 rounded-xl transition-all ${
                   darkMode 
                     ? 'hover:bg-gray-700 text-gray-300 hover:text-blue-400' 
                     : 'hover:bg-gray-100 text-gray-600 hover:text-blue-600'
@@ -6584,24 +6585,224 @@ const TravelCompanionApp = () => {
                 <Settings className="w-5 h-5" />
               </button>
               
-              <div className={`w-px h-8 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'} mx-1`}></div>
+              <div className={`hidden sm:block w-px h-8 ${darkMode ? 'bg-gray-700' : 'bg-gray-300'} mx-1`}></div>
               
               <button 
                 onClick={() => setShowCreateForm(true)}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 font-medium"
+                className="hidden sm:flex bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-2.5 rounded-xl transition-all items-center gap-2 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 font-medium"
               >
                 <Plus className="w-5 h-5" />
                 <span className="hidden md:inline">Create Trip</span>
               </button>
+              
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className={`lg:hidden p-2.5 rounded-xl transition-all ${
+                  darkMode 
+                    ? 'hover:bg-gray-700 text-gray-300' 
+                    : 'hover:bg-gray-100 text-gray-600'
+                }`}
+                aria-label="Toggle menu"
+              >
+                {showMobileMenu ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+              
               <button 
                 onClick={() => setShowProfile(true)}
-                className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-400 transition-colors cursor-pointer"
+                className="hidden sm:flex w-10 h-10 bg-gray-300 rounded-full items-center justify-center hover:bg-gray-400 transition-colors cursor-pointer"
               >
                 <User className="w-6 h-6 text-gray-600" />
               </button>
             </div>
           </div>
         </div>
+        
+        {/* Mobile Menu Dropdown */}
+        {showMobileMenu && (
+          <div className={`lg:hidden border-t ${darkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+            <div className="max-w-7xl mx-auto px-4 py-3 space-y-1">
+              {/* Navigation Links */}
+              <button 
+                onClick={() => { setActiveTab('explore'); setShowMobileMenu(false); }}
+                className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all flex items-center gap-3 ${
+                  activeTab === 'explore' 
+                    ? darkMode 
+                      ? 'bg-blue-500/20 text-blue-400' 
+                      : 'bg-blue-50 text-blue-600'
+                    : darkMode
+                      ? 'text-gray-300 hover:bg-gray-700'
+                      : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <Search className="w-5 h-5" />
+                Explore
+              </button>
+              
+              <button 
+                onClick={() => { setActiveTab('stories'); setShowMobileMenu(false); }}
+                className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all flex items-center gap-3 ${
+                  activeTab === 'stories' 
+                    ? darkMode 
+                      ? 'bg-blue-500/20 text-blue-400' 
+                      : 'bg-blue-50 text-blue-600'
+                    : darkMode
+                      ? 'text-gray-300 hover:bg-gray-700'
+                      : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <BookOpen className="w-5 h-5" />
+                Stories
+              </button>
+              
+              <button 
+                onClick={() => { setActiveTab('communities'); setShowMobileMenu(false); }}
+                className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all flex items-center gap-3 ${
+                  activeTab === 'communities' 
+                    ? darkMode 
+                      ? 'bg-blue-500/20 text-blue-400' 
+                      : 'bg-blue-50 text-blue-600'
+                    : darkMode
+                      ? 'text-gray-300 hover:bg-gray-700'
+                      : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <Users className="w-5 h-5" />
+                Communities
+              </button>
+              
+              <button 
+                onClick={() => { setActiveTab('memories'); setShowMobileMenu(false); }}
+                className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all flex items-center gap-3 ${
+                  activeTab === 'memories' 
+                    ? darkMode 
+                      ? 'bg-blue-500/20 text-blue-400' 
+                      : 'bg-blue-50 text-blue-600'
+                    : darkMode
+                      ? 'text-gray-300 hover:bg-gray-700'
+                      : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <Image className="w-5 h-5" />
+                Memories
+              </button>
+              
+              <button 
+                onClick={() => { setActiveTab('reviews'); setShowMobileMenu(false); }}
+                className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all flex items-center gap-3 ${
+                  activeTab === 'reviews' 
+                    ? darkMode 
+                      ? 'bg-blue-500/20 text-blue-400' 
+                      : 'bg-blue-50 text-blue-600'
+                    : darkMode
+                      ? 'text-gray-300 hover:bg-gray-700'
+                      : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <Star className="w-5 h-5" />
+                Reviews
+              </button>
+              
+              <button 
+                onClick={() => { setActiveTab('mytrips'); setShowMobileMenu(false); }}
+                className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all flex items-center gap-3 ${
+                  activeTab === 'mytrips' 
+                    ? darkMode 
+                      ? 'bg-blue-500/20 text-blue-400' 
+                      : 'bg-blue-50 text-blue-600'
+                    : darkMode
+                      ? 'text-gray-300 hover:bg-gray-700'
+                      : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <MapPin className="w-5 h-5" />
+                My Trips
+              </button>
+              
+              <button 
+                onClick={() => { setActiveTab('messages'); setShowMobileMenu(false); }}
+                className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all flex items-center gap-3 ${
+                  activeTab === 'messages' 
+                    ? darkMode 
+                      ? 'bg-blue-500/20 text-blue-400' 
+                      : 'bg-blue-50 text-blue-600'
+                    : darkMode
+                      ? 'text-gray-300 hover:bg-gray-700'
+                      : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <MessageCircle className="w-5 h-5" />
+                Messages
+              </button>
+              
+              <button 
+                onClick={() => { setActiveTab('profile'); setShowMobileMenu(false); }}
+                className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all flex items-center gap-3 ${
+                  activeTab === 'profile' 
+                    ? darkMode 
+                      ? 'bg-blue-500/20 text-blue-400' 
+                      : 'bg-blue-50 text-blue-600'
+                    : darkMode
+                      ? 'text-gray-300 hover:bg-gray-700'
+                      : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <User className="w-5 h-5" />
+                Profile
+              </button>
+              
+              {/* Divider */}
+              <div className={`h-px ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} my-2`}></div>
+              
+              {/* Quick Actions */}
+              <button 
+                onClick={() => { setShowCreateForm(true); setShowMobileMenu(false); }}
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2"
+              >
+                <Plus className="w-5 h-5" />
+                Create Trip
+              </button>
+              
+              <div className="flex gap-2 pt-2">
+                <button 
+                  onClick={() => { setShowCurrencyModal(true); setShowMobileMenu(false); }}
+                  className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                    darkMode
+                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  <Coins className="w-5 h-5" />
+                  Currency
+                </button>
+                
+                <button 
+                  onClick={() => { toggleDarkMode(); setShowMobileMenu(false); }}
+                  className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                    darkMode
+                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                  {darkMode ? 'Light' : 'Dark'}
+                </button>
+                
+                <button 
+                  onClick={() => { setShowAccessibilitySettings(true); setShowMobileMenu(false); }}
+                  className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                    darkMode
+                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  <Settings className="w-5 h-5" />
+                  Settings
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Hero Section */}
