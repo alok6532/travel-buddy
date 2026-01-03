@@ -5156,26 +5156,26 @@ const TravelCompanionApp = () => {
                 {/* Add Expense Form */}
                 <div className="bg-green-50 p-4 rounded-lg">
                   <h3 className="font-semibold text-gray-900 mb-3">➕ Add Expense</h3>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <input
                       type="text"
                       placeholder="Expense title"
                       value={newExpense.title}
                       onChange={(e) => setNewExpense({...newExpense, title: e.target.value})}
-                      className="px-3 py-2 border rounded-lg"
+                      className="px-3 py-2 border rounded-lg w-full"
                     />
-                    <div className="flex gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       <input
                         type="number"
                         placeholder="Amount"
                         value={newExpense.amount}
                         onChange={(e) => setNewExpense({...newExpense, amount: e.target.value})}
-                        className="flex-1 px-3 py-2 border rounded-lg"
+                        className="px-3 py-2 border rounded-lg w-full"
                       />
                       <select
                         value={newExpense.currency}
                         onChange={(e) => setNewExpense({...newExpense, currency: e.target.value})}
-                        className="px-3 py-2 border rounded-lg"
+                        className="px-2 sm:px-3 py-2 border rounded-lg w-full text-sm sm:text-base"
                       >
                         <option value="INR">₹ INR</option>
                         <option value="USD">$ USD</option>
@@ -5186,7 +5186,7 @@ const TravelCompanionApp = () => {
                     <select
                       value={newExpense.category}
                       onChange={(e) => setNewExpense({...newExpense, category: e.target.value})}
-                      className="px-3 py-2 border rounded-lg"
+                      className="px-3 py-2 border rounded-lg w-full"
                     >
                       <option value="food">🍽️ Food</option>
                       <option value="travel">🚗 Travel</option>
@@ -5276,16 +5276,16 @@ const TravelCompanionApp = () => {
                     </div>
                   ) : (
                     (tripExpenses[trip.id] || []).map(expense => (
-                      <div key={expense.id} className="bg-white border border-gray-200 p-3 rounded-lg flex justify-between items-center">
-                        <div>
-                          <div className="font-medium text-gray-900">{expense.title}</div>
-                          <div className="text-sm text-gray-600">
+                      <div key={expense.id} className="bg-white border border-gray-200 p-3 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-gray-900 truncate">{expense.title}</div>
+                          <div className="text-xs sm:text-sm text-gray-600 truncate">
                             {expense.paidBy} paid • Split among {expense.participants.length} • {expense.category}
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="font-bold text-gray-900">{expense.currency} {expense.amount.toFixed(2)}</div>
-                          <div className="text-sm text-gray-600">
+                        <div className="text-left sm:text-right flex-shrink-0">
+                          <div className="font-bold text-gray-900 text-sm sm:text-base">{expense.currency} {expense.amount.toFixed(2)}</div>
+                          <div className="text-xs sm:text-sm text-gray-600">
                             {expense.currency} {(expense.amount / expense.participants.length).toFixed(2)} each
                           </div>
                         </div>
@@ -5319,18 +5319,18 @@ const TravelCompanionApp = () => {
                 {/* Add Custom Item */}
                 <div className="bg-purple-50 p-4 rounded-lg">
                   <h3 className="font-semibold text-gray-900 mb-3">➕ Add Custom Item</h3>
-                  <div className="flex gap-3">
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <input
                       type="text"
                       placeholder="Item name"
                       value={newPackingItem.item}
                       onChange={(e) => setNewPackingItem({...newPackingItem, item: e.target.value})}
-                      className="flex-1 px-3 py-2 border rounded-lg"
+                      className="flex-1 px-3 py-2 border rounded-lg w-full"
                     />
                     <select
                       value={newPackingItem.category}
                       onChange={(e) => setNewPackingItem({...newPackingItem, category: e.target.value})}
-                      className="px-3 py-2 border rounded-lg"
+                      className="px-3 py-2 border rounded-lg w-full sm:w-auto"
                     >
                       <option value="personal">Personal</option>
                       <option value="shared">Shared</option>
@@ -5345,7 +5345,7 @@ const TravelCompanionApp = () => {
                           setNewPackingItem({ item: '', category: 'personal', isShared: false });
                         }
                       }}
-                      className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+                      className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 w-full sm:w-auto flex-shrink-0"
                     >
                       Add
                     </button>
