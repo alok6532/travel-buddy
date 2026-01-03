@@ -2962,12 +2962,18 @@ const TravelCompanionApp = () => {
   // Enhanced filtering with activities, languages, and ratings
   const getFilteredAndSortedTrips = () => {
     console.log('Filtering trips with searchQuery:', searchQuery);
+    console.log('Total trips before filter:', trips.length);
     let filtered = trips.filter(trip => {
       const matchesSearch = searchQuery === '' || 
                            trip.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            trip.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            trip.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            trip.description.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      if (searchQuery !== '' && matchesSearch) {
+        console.log('Trip matches search:', trip.title);
+      }
+      
       const matchesType = selectedFilters.tripType === 'all' || trip.type === selectedFilters.tripType;
       const matchesBudget = selectedFilters.budget === 'all' || trip.budget === selectedFilters.budget;
       
@@ -3013,6 +3019,8 @@ const TravelCompanionApp = () => {
         break;
     }
 
+    console.log('Filtered trips count:', filtered.length);
+    console.log('Filtered trips:', filtered.map(t => t.title));
     return filtered;
   };
 
