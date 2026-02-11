@@ -67,6 +67,17 @@ const TravelCompanionApp = () => {
     minRating: 0
   });
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newTripForm, setNewTripForm] = useState({
+    title: '',
+    destination: '',
+    startDate: '',
+    endDate: '',
+    tripType: 'Adventure',
+    budget: 'Mid-range',
+    description: '',
+    totalSpots: 4,
+    minTrustScore: 0
+  });
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [joinedTrips, setJoinedTrips] = useState([]);
   const [showProfile, setShowProfile] = useState(false);
@@ -486,7 +497,7 @@ const TravelCompanionApp = () => {
     }
   ]);
 
-  const trips = [
+  const initialTrips = [
     {
       id: 1,
       title: "Ladakh Bike Expedition",
@@ -769,6 +780,9 @@ const TravelCompanionApp = () => {
       pace: "Relaxed"
     }
   ];
+
+  // Trips state
+  const [trips, setTrips] = useState(initialTrips);
 
   // Mock Trip Stories Data
   const mockTripStories = [
@@ -1459,6 +1473,99 @@ const TravelCompanionApp = () => {
       console.error('Update profile error:', error);
       alert('An error occurred while updating your profile.');
     }
+  };
+
+  // Handle Create Trip
+  const handleCreateTrip = (e) => {
+    e.preventDefault();
+    
+    if (!newTripForm.title || !newTripForm.destination || !newTripForm.startDate || !newTripForm.endDate) {
+      alert('Please fill in all required fields (Title, Destination, Dates)');
+      return;
+    }
+    
+    // Calculate trip duration
+    const start = new Date(newTripForm.startDate);
+    const end = new Date(newTripForm.endDate);
+    const diffTime = Math.abs(end - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    
+    // Create new trip object
+    const newTrip = {
+      id: Date.now(), // Use timestamp as unique ID
+      title: newTripForm.title,
+      destination: newTripForm.destination,
+      host: {
+        name: currentUser?.name || "Anonymous",
+        age: 25,
+        avatar: currentUser?.name?.charAt(0).toUpperCase() || "A",
+        rating: currentUser?.rating || 0,
+        reviewCount: currentUser?.reviewCount || 0,
+        verified: currentUser?.verified || false,
+        idVerified: currentUser?.idVerified || false,
+        emailVerified: currentUser?.emailVerified || false,
+        universityEmail: currentUser?.universityEmail || false,
+        tripsCompleted: currentUser?.tripsCompleted || 0,
+        languages: currentUser?.languages || ['English'],
+        trustScore: currentUser?.trustScore || 20
+      },
+      dates: `${new Date(newTripForm.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(newTripForm.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
+      duration: `${diffDays} ${diffDays === 1 ? 'day' : 'days'}`,
+      budget: newTripForm.budget,
+      type: newTripForm.tripType,
+      activities: selectedActivities.length > 0 ? selectedActivities : ['Sightseeing'],
+      languages: selectedLanguages.length > 0 ? selectedLanguages : ['English'],
+      rating: 0,
+      reviewCount: 0,
+      description: newTripForm.description || `Join us for an amazing ${newTripForm.tripType.toLowerCase()} trip to ${newTripForm.destination}!`,
+      image: getDefaultImageForType(newTripForm.tripType),
+      completed: false,
+      ageRange: { min: 18, max: 60 },
+      groupSize: { current: 1, max: parseInt(newTripForm.totalSpots) || 4 },
+      pace: "Moderate",
+      minTrustScore: parseInt(newTripForm.minTrustScore) || 0
+    };
+    
+    // Add trip to the list
+    setTrips([newTrip, ...trips]);
+    
+    // Initialize trip spots
+    setTripSpots(prev => ({
+      ...prev,
+      [newTrip.id]: { total: newTrip.groupSize.max, filled: 1 }
+    }));
+    
+    // Reset form and close modal
+    setNewTripForm({
+      title: '',
+      destination: '',
+      startDate: '',
+      endDate: '',
+      tripType: 'Adventure',
+      budget: 'Mid-range',
+      description: '',
+      totalSpots: 4,
+      minTrustScore: 0
+    });
+    setSelectedActivities([]);
+    setSelectedLanguages([]);
+    setShowCreateForm(false);
+    
+    alert(`Trip "${newTrip.title}" created successfully! 🎉`);
+    
+    // Switch to explore tab to see the new trip
+    setActiveTab('explore');
+  };
+  
+  // Get default image based on trip type
+  const getDefaultImageForType = (type) => {
+    const imageMap = {
+      'Adventure': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
+      'Beach': 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=300&fit=crop',
+      'Cultural': 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400&h=300&fit=crop',
+      'Nature': 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop'
+    };
+    return imageMap[type] || imageMap['Adventure'];
   };
 
   // No need for auto-scroll to trips section since filtered results appear at top
@@ -8437,33 +8544,63 @@ const TravelCompanionApp = () => {
                   ✕
                 </button>
               </div>
-              <form className="space-y-4" onClick={(e) => {
+              <form className="space-y-4" onSubmit={handleCreateTrip} onClick={(e) => {
                 if (!e.target.closest('.language-selector')) {
                   setShowLanguageDropdown(false);
                 }
               }}>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Trip Title</label>
-                  <input type="text" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Manali Adventure Trek" />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Trip Title *</label>
+                  <input 
+                    type="text" 
+                    value={newTripForm.title}
+                    onChange={(e) => setNewTripForm({...newTripForm, title: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    placeholder="e.g., Manali Adventure Trek" 
+                    required
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Destination</label>
-                  <input type="text" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Manali, Himachal Pradesh" />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Destination *</label>
+                  <input 
+                    type="text" 
+                    value={newTripForm.destination}
+                    onChange={(e) => setNewTripForm({...newTripForm, destination: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    placeholder="e.g., Manali, Himachal Pradesh" 
+                    required
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                    <input type="date" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Start Date *</label>
+                    <input 
+                      type="date" 
+                      value={newTripForm.startDate}
+                      onChange={(e) => setNewTripForm({...newTripForm, startDate: e.target.value})}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                      required
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                    <input type="date" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <label className="block text-sm font-medium text-gray-700 mb-1">End Date *</label>
+                    <input 
+                      type="date" 
+                      value={newTripForm.endDate}
+                      onChange={(e) => setNewTripForm({...newTripForm, endDate: e.target.value})}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                      required
+                    />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Trip Type</label>
-                    <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select 
+                      value={newTripForm.tripType}
+                      onChange={(e) => setNewTripForm({...newTripForm, tripType: e.target.value})}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
                       <option>Adventure</option>
                       <option>Beach</option>
                       <option>Cultural</option>
@@ -8472,7 +8609,11 @@ const TravelCompanionApp = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Budget</label>
-                    <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select 
+                      value={newTripForm.budget}
+                      onChange={(e) => setNewTripForm({...newTripForm, budget: e.target.value})}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
                       <option>Budget</option>
                       <option>Mid-range</option>
                       <option>Luxury</option>
@@ -8525,7 +8666,15 @@ const TravelCompanionApp = () => {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Total Spots</label>
-                  <input type="number" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="How many travelers?" min="2" max="20" />
+                  <input 
+                    type="number" 
+                    value={newTripForm.totalSpots}
+                    onChange={(e) => setNewTripForm({...newTripForm, totalSpots: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    placeholder="How many travelers?" 
+                    min="2" 
+                    max="20" 
+                  />
                 </div>
                 
                 {/* Minimum Profile Score Requirement */}
@@ -8536,6 +8685,8 @@ const TravelCompanionApp = () => {
                   </label>
                   <input 
                     type="number" 
+                    value={newTripForm.minTrustScore}
+                    onChange={(e) => setNewTripForm({...newTripForm, minTrustScore: e.target.value})}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
                     placeholder="Leave empty for no requirement" 
                     min="0" 
@@ -8556,7 +8707,13 @@ const TravelCompanionApp = () => {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                  <textarea rows="4" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Describe your trip plans, interests, and what you're looking for in travel companions..."></textarea>
+                  <textarea 
+                    rows="4" 
+                    value={newTripForm.description}
+                    onChange={(e) => setNewTripForm({...newTripForm, description: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    placeholder="Describe your trip plans, interests, and what you're looking for in travel companions..."
+                  />
                 </div>
                 
                 {/* Languages Selector */}
@@ -8635,12 +8792,7 @@ const TravelCompanionApp = () => {
                 
                 <div className="flex space-x-3 pt-4">
                   <button 
-                    type="button"
-                    onClick={() => {
-                      alert('Trip created successfully! (This is a demo)');
-                      setShowCreateForm(false);
-                      setSelectedLanguages([]);
-                    }}
+                    type="submit"
                     className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
                   >
                     Create Trip
@@ -8649,7 +8801,19 @@ const TravelCompanionApp = () => {
                     type="button"
                     onClick={() => {
                       setShowCreateForm(false);
+                      setNewTripForm({
+                        title: '',
+                        destination: '',
+                        startDate: '',
+                        endDate: '',
+                        tripType: 'Adventure',
+                        budget: 'Mid-range',
+                        description: '',
+                        totalSpots: 4,
+                        minTrustScore: 0
+                      });
                       setSelectedLanguages([]);
+                      setSelectedActivities([]);
                       setLanguageSearch('');
                     }}
                     className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition-colors font-medium"
