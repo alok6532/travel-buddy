@@ -7806,7 +7806,15 @@ const TravelCompanionApp = () => {
                   <p className="text-gray-600">Learn from real travelers' experiences, budgets, and tips</p>
                 </div>
                 <button
-                  onClick={() => setShowStoryEditor(true)}
+                  onClick={() => {
+                    if (isAuthenticated) {
+                      setShowStoryEditor(true);
+                    } else {
+                      alert('Please login to share your story');
+                      setShowAuthModal(true);
+                      setAuthMode('login');
+                    }
+                  }}
                   className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2"
                 >
                   <Plus className="w-5 h-5" />
@@ -9799,6 +9807,226 @@ const TravelCompanionApp = () => {
                     className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
                   >
                     Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Share Your Story Modal */}
+      {showStoryEditor && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="p-6 sm:p-8">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  <Plus className="w-7 h-7 text-blue-600" />
+                  Share Your Travel Story
+                </h2>
+                <button 
+                  onClick={() => setShowStoryEditor(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              {/* Info Banner */}
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  <strong>Share your experience!</strong> Help fellow travelers by sharing your journey, 
+                  budget breakdown, tips, and lessons learned. Your story could inspire someone's next adventure!
+                </p>
+              </div>
+              
+              <form className="space-y-6">
+                {/* Basic Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Basic Information</h3>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Story Title *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g., Conquering the Himalayas: My Ladakh Journey"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Destination *
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g., Leh, Ladakh"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Trip Duration
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g., 14 days"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Introduction *
+                    </label>
+                    <textarea
+                      placeholder="Share a brief overview of your journey..."
+                      rows="4"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                
+                {/* Budget Breakdown */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Budget Breakdown</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Planned Budget (₹)
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="35000"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Actual Spent (₹)
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="38500"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-600 mb-3">
+                      <strong>Expense Categories:</strong> Add your spending breakdown
+                    </p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" id="transport" className="rounded" />
+                        <label htmlFor="transport">Transport</label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" id="accommodation" className="rounded" />
+                        <label htmlFor="accommodation">Accommodation</label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" id="food" className="rounded" />
+                        <label htmlFor="food">Food</label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" id="activities" className="rounded" />
+                        <label htmlFor="activities">Activities</label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" id="misc" className="rounded" />
+                        <label htmlFor="misc">Miscellaneous</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Tips & Lessons */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Tips & Lessons Learned</h3>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Top Tips for Future Travelers
+                    </label>
+                    <textarea
+                      placeholder="Share your best tips (one per line)&#10;e.g., Start altitude medication 2 days early&#10;Carry extra cash - ATMs don't work everywhere"
+                      rows="4"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Mistakes to Avoid
+                    </label>
+                    <textarea
+                      placeholder="What would you do differently?&#10;e.g., Don't pack too much - half the stuff never used"
+                      rows="3"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                
+                {/* Visibility */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Privacy Settings</h3>
+                  
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                      <input type="radio" name="visibility" value="public" defaultChecked className="text-blue-600" />
+                      <div>
+                        <div className="font-medium text-gray-900">Public</div>
+                        <div className="text-sm text-gray-600">Anyone can view your story</div>
+                      </div>
+                    </label>
+                    
+                    <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                      <input type="radio" name="visibility" value="trip-only" className="text-blue-600" />
+                      <div>
+                        <div className="font-medium text-gray-900">Trip Members Only</div>
+                        <div className="text-sm text-gray-600">Only people who joined your trip can view</div>
+                      </div>
+                    </label>
+                    
+                    <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                      <input type="radio" name="visibility" value="private" className="text-blue-600" />
+                      <div>
+                        <div className="font-medium text-gray-900">Private</div>
+                        <div className="text-sm text-gray-600">Only visible to you (draft mode)</div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4 border-t">
+                  <button
+                    type="button"
+                    onClick={() => setShowStoryEditor(false)}
+                    className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      alert('Story submitted! This feature will save your story once backend is connected.');
+                      setShowStoryEditor(false);
+                    }}
+                    className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+                  >
+                    Publish Story
                   </button>
                 </div>
               </form>
