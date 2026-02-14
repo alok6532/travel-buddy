@@ -1513,8 +1513,8 @@ const TravelCompanionApp = () => {
       duration: `${diffDays} ${diffDays === 1 ? 'day' : 'days'}`,
       budget: newTripForm.budget,
       type: newTripForm.tripType,
-      activities: selectedActivities.length > 0 ? selectedActivities : ['Sightseeing'],
-      languages: selectedLanguages.length > 0 ? selectedLanguages : ['English'],
+      activities: (selectedActivities && selectedActivities.length > 0) ? selectedActivities : ['Sightseeing'],
+      languages: (selectedLanguages && selectedLanguages.length > 0) ? selectedLanguages : ['English'],
       rating: 0,
       reviewCount: 0,
       description: newTripForm.description || `Join us for an amazing ${newTripForm.tripType.toLowerCase()} trip to ${newTripForm.destination}!`,
@@ -1547,8 +1547,8 @@ const TravelCompanionApp = () => {
       totalSpots: 4,
       minTrustScore: 0
     });
-    setSelectedActivities([]);
-    setSelectedLanguages([]);
+    if (setSelectedActivities) setSelectedActivities([]);
+    if (setSelectedLanguages) setSelectedLanguages([]);
     setShowCreateForm(false);
     
     alert(`Trip "${newTrip.title}" created successfully! 🎉`);
