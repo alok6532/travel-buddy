@@ -1475,6 +1475,18 @@ const TravelCompanionApp = () => {
     }
   };
 
+  // Calculate price based on budget and duration
+  const getPriceFromBudget = (budget, days) => {
+    const perDayRates = {
+      'Budget': 1500,
+      'Mid-range': 2500,
+      'Luxury': 5000
+    };
+    const dailyRate = perDayRates[budget] || 2500;
+    const totalPrice = dailyRate * days;
+    return `₹${totalPrice.toLocaleString('en-IN')}`;
+  };
+
   // Handle Create Trip
   const handleCreateTrip = (e) => {
     e.preventDefault();
@@ -1512,6 +1524,7 @@ const TravelCompanionApp = () => {
       dates: `${new Date(newTripForm.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(newTripForm.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
       duration: `${diffDays} ${diffDays === 1 ? 'day' : 'days'}`,
       budget: newTripForm.budget,
+      pricePerPerson: getPriceFromBudget(newTripForm.budget, diffDays),
       type: newTripForm.tripType,
       activities: (selectedActivities && selectedActivities.length > 0) ? selectedActivities : ['Sightseeing'],
       languages: (selectedLanguages && selectedLanguages.length > 0) ? selectedLanguages : ['English'],
@@ -1522,6 +1535,7 @@ const TravelCompanionApp = () => {
       completed: false,
       ageRange: { min: 18, max: 60 },
       groupSize: { current: 1, max: parseInt(newTripForm.totalSpots) || 4 },
+      spots: { total: parseInt(newTripForm.totalSpots) || 4, filled: 1 },
       pace: "Moderate",
       minTrustScore: parseInt(newTripForm.minTrustScore) || 0
     };
