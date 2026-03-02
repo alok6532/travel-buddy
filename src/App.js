@@ -1499,7 +1499,14 @@ const TravelCompanionApp = () => {
     // Calculate trip duration
     const start = new Date(newTripForm.startDate);
     const end = new Date(newTripForm.endDate);
-    const diffTime = Math.abs(end - start);
+    
+    // Validate end date is after start date
+    if (end < start) {
+      alert('End date must be after start date');
+      return;
+    }
+    
+    const diffTime = end - start;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
     
     // Create new trip object
@@ -1610,13 +1617,16 @@ const TravelCompanionApp = () => {
   const confirmJoin = () => {
     if (selectedTrip && !joinedTrips.includes(selectedTrip.id)) {
       setJoinedTrips([...joinedTrips, selectedTrip.id]);
-      setTripSpots(prev => ({
-        ...prev,
-        [selectedTrip.id]: {
-          ...prev[selectedTrip.id],
-          filled: prev[selectedTrip.id].filled + 1
-        }
-      }));
+      setTripSpots(prev => {
+        const currentSpots = prev[selectedTrip.id] || { total: selectedTrip.spots?.total || selectedTrip.groupSize?.max || 4, filled: selectedTrip.spots?.filled || selectedTrip.groupSize?.current || 0 };
+        return {
+          ...prev,
+          [selectedTrip.id]: {
+            ...currentSpots,
+            filled: currentSpots.filled + 1
+          }
+        };
+      });
       alert(`Successfully joined ${selectedTrip.title}!`);
       setSelectedTrip(null);
     }
@@ -2364,7 +2374,7 @@ const TravelCompanionApp = () => {
     }
     
     // Budget matching (25 points max)
-    const tripPrice = parseInt(trip.pricePerPerson.replace(/[^0-9]/g, ''));
+    const tripPrice = parseInt((trip.pricePerPerson || '0').replace(/[^0-9]/g, ''));
     const budgetMin = userPreferences.budgetRange.min;
     const budgetMax = userPreferences.budgetRange.max;
     if (tripPrice >= budgetMin && tripPrice <= budgetMax) {
@@ -2597,12 +2607,12 @@ const TravelCompanionApp = () => {
     const hostProfile = {
       pace: (trip.pace || 'moderate').toLowerCase(),
       budgetRange: { 
-        min: parseInt(trip.pricePerPerson.replace(/[^0-9]/g, '')) * 0.8,
-        max: parseInt(trip.pricePerPerson.replace(/[^0-9]/g, '')) * 1.2
+        min: parseInt((trip.pricePerPerson || '0').replace(/[^0-9]/g, '')) * 0.8,
+        max: parseInt((trip.pricePerPerson || '0').replace(/[^0-9]/g, '')) * 1.2
       },
       interests: trip.activities || [],
       travelStyle: trip.type.toLowerCase(),
-      rating: trip.host.rating || 4.5
+      rating: trip.host?.rating || 4.5
     };
     
     const currentUserProfile = {
@@ -2811,7 +2821,7 @@ const TravelCompanionApp = () => {
     return tripsList.filter(trip => {
       // Budget range filter
       if (advancedFilters.budgetRange.enabled) {
-        const price = parseInt(trip.pricePerPerson.replace(/[^0-9]/g, ''));
+        const price = parseInt((trip.pricePerPerson || '0').replace(/[^0-9]/g, ''));
         if (price < advancedFilters.budgetRange.min || price > advancedFilters.budgetRange.max) {
           return false;
         }
@@ -3025,7 +3035,7 @@ const TravelCompanionApp = () => {
       clusters[key].trips.push(trip);
       clusters[key].count++;
       
-      const price = parseInt(trip.pricePerPerson.replace(/[^0-9]/g, ''));
+      const price = parseInt((trip.pricePerPerson || '0').replace(/[^0-9]/g, ''));
       clusters[key].priceRange.min = Math.min(clusters[key].priceRange.min, price);
       clusters[key].priceRange.max = Math.max(clusters[key].priceRange.max, price);
     });
@@ -3245,10 +3255,11 @@ const TravelCompanionApp = () => {
       title: trip.title,
       destination: trip.destination,
       dates: trip.dates,
-      price: trip.price,
+      price: parseInt((trip.pricePerPerson || '0').replace(/[^0-9]/g, '')),
+      pricePerPerson: trip.pricePerPerson,
       groupSize: trip.groupSize,
-      currentParticipants: trip.currentParticipants,
-      organizer: trip.organizer,
+      currentParticipants: trip.spots?.filled || trip.groupSize?.current || 0,
+      host: trip.host,
       description: trip.description,
       activities: trip.activities || [],
       languages: trip.languages || [],
@@ -3501,15 +3512,15 @@ const TravelCompanionApp = () => {
     switch(sortBy) {
       case 'price-low':
         filtered.sort((a, b) => {
-          const priceA = parseInt(a.pricePerPerson.replace(/[^0-9]/g, ''));
-          const priceB = parseInt(b.pricePerPerson.replace(/[^0-9]/g, ''));
+          const priceA = parseInt((a.pricePerPerson || '0').replace(/[^0-9]/g, ''));
+          const priceB = parseInt((b.pricePerPerson || '0').replace(/[^0-9]/g, ''));
           return priceA - priceB;
         });
         break;
       case 'price-high':
         filtered.sort((a, b) => {
-          const priceA = parseInt(a.pricePerPerson.replace(/[^0-9]/g, ''));
-          const priceB = parseInt(b.pricePerPerson.replace(/[^0-9]/g, ''));
+          const priceA = parseInt((a.pricePerPerson || '0').replace(/[^0-9]/g, ''));
+          const priceB = parseInt((b.pricePerPerson || '0').replace(/[^0-9]/g, ''));
           return priceB - priceA;
         });
         break;
@@ -6723,7 +6734,7 @@ const TravelCompanionApp = () => {
   );
 
   const TripCard = ({ trip }) => {
-    const spots = tripSpots[trip.id];
+    const spots = tripSpots[trip.id] || { total: trip.spots?.total || trip.groupSize?.max || 4, filled: trip.spots?.filled || trip.groupSize?.current || 0 };
     
     return (
     <div className={`card-trip ${darkMode ? 'bg-gray-800 text-white' : 'bg-white'} rounded-lg shadow-md overflow-hidden`}>
@@ -6744,7 +6755,7 @@ const TravelCompanionApp = () => {
         <div className="absolute bottom-3 right-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
           {trip.type}
         </div>
-        {trip.rating && (
+        {trip.rating > 0 && (
           <div className="absolute top-3 left-3 bg-white px-3 py-1 rounded-full text-sm font-semibold text-gray-900 flex items-center">
             <span className="text-yellow-400 mr-1">★</span>
             {trip.rating} ({trip.reviewCount})
@@ -6799,10 +6810,10 @@ const TravelCompanionApp = () => {
         )}
         
         <div className="flex items-center text-green-600 font-semibold mb-3">
-          <span className="text-lg">{formatCurrency(trip.price, selectedCurrency)}</span>
+          <span className="text-lg">{formatCurrency(parseInt((trip.pricePerPerson || '0').replace(/[^0-9]/g, '')), selectedCurrency)}</span>
           <span className={`text-sm ml-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>per person</span>
-          {selectedCurrency !== 'INR' && trip.price && (
-            <span className={`text-xs ml-2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>(₹{trip.price.toLocaleString()})</span>
+          {selectedCurrency !== 'INR' && trip.pricePerPerson && (
+            <span className={`text-xs ml-2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>({trip.pricePerPerson})</span>
           )}
         </div>
         <p className={`text-sm mb-4 line-clamp-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{trip.description}</p>
@@ -6831,10 +6842,10 @@ const TravelCompanionApp = () => {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-500">{trip.host.age} years</span>
-                {trip.host.rating && (
+                {trip.host.rating > 0 && (
                   <span className="text-xs text-yellow-600">★ {trip.host.rating}</span>
                 )}
-                {trip.host.trustScore && (
+                {trip.host.trustScore > 0 && (
                   <span className="text-xs text-blue-600 font-semibold" title="Trust Score">
                     TS: {trip.host.trustScore}
                   </span>
@@ -6846,7 +6857,7 @@ const TravelCompanionApp = () => {
             <p className="text-sm font-semibold text-gray-900">
               {spots.filled}/{spots.total} spots
             </p>
-            {trip.minTrustScore && (
+            {trip.minTrustScore > 0 && (
               <p className="text-xs text-gray-600 mt-1">
                 <Shield className="w-3 h-3 inline mr-1" />
                 Min Score: {trip.minTrustScore}
@@ -8499,7 +8510,7 @@ const TravelCompanionApp = () => {
                       </div>
                       <div className="flex gap-2 flex-wrap">
                         <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
-                          {tripSpots[trip.id].filled}/{tripSpots[trip.id].total} joined
+                          {(tripSpots[trip.id] || trip.spots || { filled: 0, total: 0 }).filled}/{(tripSpots[trip.id] || trip.spots || { filled: 0, total: 0 }).total} joined
                         </span>
                         <span className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-full">
                           {trip.type}
