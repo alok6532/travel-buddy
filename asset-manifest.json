@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/travel-buddy/static/css/main.a17af64f.css",
-    "main.js": "/travel-buddy/static/js/main.2c3a2ec8.js",
+    "main.js": "/travel-buddy/static/js/main.c1b774b9.js",
     "index.html": "/travel-buddy/index.html",
     "main.a17af64f.css.map": "/travel-buddy/static/css/main.a17af64f.css.map",
-    "main.2c3a2ec8.js.map": "/travel-buddy/static/js/main.2c3a2ec8.js.map"
+    "main.c1b774b9.js.map": "/travel-buddy/static/js/main.c1b774b9.js.map"
   },
   "entrypoints": [
     "static/css/main.a17af64f.css",
-    "static/js/main.2c3a2ec8.js"
+    "static/js/main.c1b774b9.js"
   ]
 }
