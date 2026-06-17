@@ -1428,9 +1428,127 @@ const TravelCompanionApp = () => {
     setAuthErrors({});
   };
   
-  // Handle Google Login (simulated)
-  const handleGoogleLogin = () => {
-    alert('Google Sign-In integration coming soon!\n\nThis would use OAuth 2.0 to authenticate with Google.');
+  // Google Identity (client) helper - requires REACT_APP_GOOGLE_CLIENT_ID or localStorage key
+  const GOOGLE_CLIENT_ID = process?.env?.REACT_APP_GOOGLE_CLIENT_ID || localStorage.getItem('travelbuddy_google_client_id') || null;
+
+  const loadGoogleIdentityScript = () => {
+    if (window.google && window.google.accounts && window.google.accounts.id) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const existing = document.getElementById('google-identity');
+      if (existing) {
+        existing.addEventListener('load', () => resolve());
+        existing.addEventListener('error', (e) => reject(e));
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.id = 'google-identity';
+      script.async = true;
+      script.defer = true;
+      script.onload = () => resolve();
+      script.onerror = (e) => reject(e);
+      document.body.appendChild(script);
+    });
+  };
+
+  const parseJwt = (token) => {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      console.error('Failed to parse JWT', e);
+      return null;
+    }
+  };
+
+  const handleGoogleCredentialResponse = (resp) => {
+    if (!resp || !resp.credential) {
+      alert('Google sign-in failed or was cancelled.');
+      return;
+    }
+
+    const payload = parseJwt(resp.credential);
+    if (!payload) {
+      alert('Unable to read Google profile information.');
+      return;
+    }
+
+    // Build a local user object compatible with app expectations
+    const googleUser = {
+      id: payload.sub,
+      name: payload.name || payload.email?.split('@')[0] || 'GoogleUser',
+      email: payload.email,
+      avatar: payload.picture ? payload.picture.split('?')[0] : (payload.name ? payload.name.charAt(0).toUpperCase() : 'G'),
+      rating: 0,
+      reviewCount: 0,
+      verified: payload.email_verified || false,
+      idVerified: false,
+      emailVerified: payload.email_verified || false,
+      tripsCompleted: 0,
+      trustScore: 40
+    };
+
+    try {
+      const existingUsers = JSON.parse(localStorage.getItem('travelbuddy_users') || '[]');
+      const byEmail = existingUsers.find(u => u.email === googleUser.email);
+      if (!byEmail) {
+        existingUsers.push(googleUser);
+        localStorage.setItem('travelbuddy_users', JSON.stringify(existingUsers));
+      }
+
+      // Persist session (token = id_token)
+      localStorage.setItem('travelbuddy_token', resp.credential);
+      localStorage.setItem('travelbuddy_user', JSON.stringify(googleUser));
+
+      setCurrentUser(googleUser);
+      setIsAuthenticated(true);
+      setUserProfile(prev => ({ ...prev, ...googleUser, trustScore: googleUser.trustScore }));
+      setShowAuthModal(false);
+      alert(`Signed in as ${googleUser.name}`);
+    } catch (e) {
+      console.error('Error persisting Google user', e);
+      alert('Signed in with Google but failed to persist session locally.');
+    }
+  };
+
+  // Handle Google Login (client-side) - opens popup / One-Tap prompt
+  const handleGoogleLogin = async () => {
+    const cli = GOOGLE_CLIENT_ID;
+    if (!cli) {
+      alert('Google Client ID not configured. Set REACT_APP_GOOGLE_CLIENT_ID in your .env or set localStorage key travelbuddy_google_client_id.');
+      return;
+    }
+
+    try {
+      await loadGoogleIdentityScript();
+      if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+        alert('Failed to load Google Identity Services.');
+        return;
+      }
+
+      // Initialize the client and show popup/prompt
+      window.google.accounts.id.initialize({
+        client_id: cli,
+        callback: handleGoogleCredentialResponse,
+        ux_mode: 'popup'
+      });
+
+      // Show the One Tap prompt or the popup sign-in flow
+      try {
+        window.google.accounts.id.prompt();
+      } catch (e) {
+        // As a fallback, render a temporary button in memory and click it
+        console.warn('prompt() failed, fallback to token client', e);
+        window.google.accounts.id.request();
+      }
+    } catch (e) {
+      console.error('Google login error', e);
+      alert('Google Sign-In failed to start. Check console for details.');
+    }
   };
   
   // Update profile
