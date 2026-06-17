@@ -1429,7 +1429,7 @@ const TravelCompanionApp = () => {
   };
   
   // Google Identity (client) helper - requires REACT_APP_GOOGLE_CLIENT_ID or localStorage key
-  const GOOGLE_CLIENT_ID = process?.env?.REACT_APP_GOOGLE_CLIENT_ID || localStorage.getItem('travelbuddy_google_client_id') || null;
+  const GOOGLE_CLIENT_ID = (typeof process !== 'undefined' && process.env && process.env.REACT_APP_GOOGLE_CLIENT_ID) || localStorage.getItem('travelbuddy_google_client_id') || null;
 
   const loadGoogleIdentityScript = () => {
     if (window.google && window.google.accounts && window.google.accounts.id) return Promise.resolve();
